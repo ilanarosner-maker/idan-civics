@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>הכנה למבחן אזרחות — עידן</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff;
+    --bg2: #f7f7f5;
+    --bg3: #f0efe9;
+    --text: #1a1a18;
+    --text2: #6b6b65;
+    --text3: #9a9a92;
+    --border: rgba(0,0,0,0.1);
+    --border2: rgba(0,0,0,0.18);
+    --blue-bg: #e6f1fb;
+    --blue-text: #185fa5;
+    --blue-border: rgba(24,95,165,0.35);
+    --green-bg: #eaf3de;
+    --green-text: #3b6d11;
+    --green-border: rgba(59,109,17,0.35);
+    --amber-bg: #faeeda;
+    --amber-text: #854f0b;
+    --amber-border: rgba(133,79,11,0.35);
+    --red-bg: #fcebeb;
+    --red-text: #a32d2d;
+    --red-border: rgba(163,45,45,0.35);
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a;
+      --bg2: #252522;
+      --bg3: #2e2e2a;
+      --text: #f0efe9;
+      --text2: #9a9a92;
+      --text3: #6b6b65;
+      --border: rgba(255,255,255,0.1);
+      --border2: rgba(255,255,255,0.18);
+      --blue-bg: #0c2a4a;
+      --blue-text: #85b7eb;
+      --blue-border: rgba(133,183,235,0.3);
+      --green-bg: #173404;
+      --green-text: #c0dd97;
+      --green-border: rgba(192,221,151,0.3);
+      --amber-bg: #412402;
+      --amber-text: #fac775;
+      --amber-border: rgba(250,199,117,0.3);
+      --red-bg: #501313;
+      --red-text: #f09595;
+      --red-border: rgba(240,149,149,0.3);
+    }
+  }
+  body { font-family: -apple-system, 'Segoe UI', Arial, sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; direction: rtl; }
+  .app { max-width: 760px; margin: 0 auto; padding: 1rem; }
+  .header { text-align: center; padding: 1.5rem 0 1rem; margin-bottom: 1rem; }
+  .header h1 { font-size: 22px; font-weight: 600; color: var(--text); }
+  .header p { font-size: 13px; color: var(--text2); margin-top: 4px; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 1rem; flex-wrap: wrap; background: var(--bg); border-radius: var(--radius-lg); padding: 6px; border: 0.5px solid var(--border); }
+  .tab { padding: 8px 14px; border-radius: var(--radius); font-size: 13px; cursor: pointer; background: transparent; color: var(--text2); border: none; transition: all 0.15s; flex: 1; text-align: center; }
+  .tab:hover { background: var(--bg2); color: var(--text); }
+  .tab.active { background: var(--blue-bg); color: var(--blue-text); font-weight: 500; }
+  .section { display: none; } .section.visible { display: block; }
+  .topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 8px; margin-bottom: 1rem; }
+  .topic-btn { padding: 12px; border: 0.5px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); cursor: pointer; text-align: right; transition: all 0.15s; }
+  .topic-btn:hover { border-color: var(--blue-border); background: var(--blue-bg); }
+  .topic-btn .icon { font-size: 20px; margin-bottom: 6px; display: block; }
+  .topic-btn .name { font-size: 13px; font-weight: 500; color: var(--text); display: block; }
+  .topic-btn .count { font-size: 11px; color: var(--text2); margin-top: 2px; display: block; }
+  .card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.1rem; margin-bottom: 10px; }
+  .card h3 { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 9px; border-bottom: 0.5px solid var(--border); padding-bottom: 7px; }
+  .definition { font-size: 13px; line-height: 1.8; color: var(--text); background: var(--bg2); border-radius: var(--radius); padding: 11px; border-right: 3px solid var(--blue-border); }
+  .keywords { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+  .kw { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: var(--blue-bg); color: var(--blue-text); }
+  .flashcard { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; text-align: center; min-height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; margin-bottom: .75rem; }
+  .flashcard .q-label { font-size: 11px; color: var(--text2); margin-bottom: 10px; }
+  .flashcard .q-text { font-size: 17px; font-weight: 500; color: var(--text); line-height: 1.6; }
+  .flashcard .a-text { font-size: 13px; color: var(--text); line-height: 1.8; margin-top: 12px; background: var(--bg2); padding: 11px; border-radius: var(--radius); width: 100%; text-align: right; display: none; border-right: 3px solid var(--green-border); }
+  .flashcard.revealed .a-text { display: block; }
+  .flashcard .flip-hint { font-size: 11px; color: var(--text3); margin-top: 10px; }
+  .flashcard.revealed .flip-hint { display: none; }
+  .fc-controls { display: flex; gap: 8px; justify-content: center; }
+  .fc-controls button { padding: 8px 20px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); color: var(--text); font-size: 13px; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .fc-controls button.knew { border-color: var(--green-border); color: var(--green-text); background: var(--green-bg); }
+  .fc-controls button.didnt { border-color: var(--red-border); color: var(--red-text); background: var(--red-bg); }
+  .fc-progress { text-align: center; font-size: 12px; color: var(--text2); margin-bottom: .75rem; }
+  .progress-bar { height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 4px; }
+  .progress-fill { height: 3px; background: var(--blue-text); border-radius: 2px; transition: width .3s; }
+  .event-q { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.1rem; }
+  .q-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; padding: 3px 9px; border-radius: 12px; margin-bottom: 10px; font-weight: 500; }
+  .q-badge.real { background: var(--green-bg); color: var(--green-text); }
+  .q-badge.ai { background: var(--amber-bg); color: var(--amber-text); }
+  .passage { font-size: 13px; line-height: 1.85; color: var(--text); background: var(--bg2); padding: 13px; border-radius: var(--radius); margin-bottom: 12px; }
+  .q-label-ev { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 10px; }
+  .answer-step { border: 0.5px solid var(--border); border-radius: var(--radius); padding: 9px; margin-bottom: 7px; }
+  .answer-step label { font-size: 11px; color: var(--text2); display: block; margin-bottom: 4px; }
+  .answer-step.active { border-color: var(--blue-border); }
+  .answer-step input, .answer-step textarea { width: 100%; border: none; outline: none; background: transparent; font-family: inherit; font-size: 13px; color: var(--text); resize: none; }
+  .step-pill { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 12px; margin-left: 5px; }
+  .pill-c { background: var(--blue-bg); color: var(--blue-text); }
+  .pill-h { background: var(--green-bg); color: var(--green-text); }
+  .pill-t { background: var(--amber-bg); color: var(--amber-text); }
+  .pill-e { background: #faeeda; color: #854f0b; }
+  .check-btn { display: block; width: 100%; padding: 10px; background: var(--blue-bg); color: var(--blue-text); border: 0.5px solid var(--blue-border); border-radius: var(--radius); font-size: 13px; cursor: pointer; margin-top: 10px; font-family: inherit; }
+  .check-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .gen-btn { display: block; width: 100%; padding: 10px; margin-bottom: 1rem; background: var(--bg); border: 0.5px solid var(--border2); border-radius: var(--radius-lg); font-size: 13px; cursor: pointer; font-family: inherit; color: var(--text); text-align: center; }
+  .gen-btn:hover { border-color: var(--blue-border); background: var(--blue-bg); color: var(--blue-text); }
+  .feedback-box { margin-top: 9px; padding: 12px; border-radius: var(--radius); font-size: 13px; line-height: 1.75; display: none; }
+  .feedback-box.visible { display: block; }
+  .feedback-box.ai-feedback { background: var(--bg2); color: var(--text); border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 14px; font-size: 13px; line-height: 1.85; }
+  .loading-dots { animation: blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1;}50%{opacity:.3;} }
+  .back-btn { font-size: 12px; color: var(--text2); cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; gap: 4px; background: none; border: none; font-family: inherit; }
+  .back-btn:hover { color: var(--text); }
+  .score-summary { display: flex; gap: 8px; margin-top: 10px; }
+  .score-card { flex: 1; padding: 12px; border-radius: var(--radius); text-align: center; }
+  .score-card .num { font-size: 24px; font-weight: 600; }
+  .score-card .lbl { font-size: 11px; margin-top: 2px; }
+  .score-card.green { background: var(--green-bg); color: var(--green-text); }
+  .score-card.red { background: var(--red-bg); color: var(--red-text); }
+  .restart-btn { display: block; width: 100%; margin-top: 10px; padding: 10px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); cursor: pointer; font-size: 13px; font-family: inherit; color: var(--text); }
+  .event-list-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: right; padding: 13px; width: 100%; border: 0.5px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); cursor: pointer; margin-bottom: 8px; font-family: inherit; }
+  .event-list-item:hover { border-color: var(--blue-border); background: var(--blue-bg); }
+  .ev-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .ev-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .tip-card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem; margin-bottom: 9px; }
+  .tip-card h4 { font-size: 14px; font-weight: 500; margin-bottom: 7px; color: var(--text); }
+  .tip-card p { font-size: 13px; line-height: 1.75; color: var(--text2); }
+  .warn-box { background: var(--amber-bg); border: 0.5px solid var(--amber-border); border-radius: var(--radius-lg); padding: 1rem; margin-bottom: 10px; }
+  .warn-box p { font-size: 13px; color: var(--amber-text); line-height: 1.75; }
+  .hint-area { margin-top: 10px; border-radius: var(--radius); font-size: 12px; color: var(--text2); border: 0.5px solid var(--border2); overflow: hidden; }
+  .hint-toggle { border: none; background: var(--bg2); color: var(--text2); cursor: pointer; font-size: 13px; font-family: inherit; width: 100%; padding: 8px; text-align: center; }
+  .hint-toggle:hover { background: var(--bg3); color: var(--text); }
+  #full-hints { display: none; padding: 10px; line-height: 1.85; color: var(--text); background: var(--bg); }
+  .fc-mode-toggle { display: flex; gap: 6px; margin-bottom: 10px; }
+  .fc-mode-btn { flex: 1; padding: 7px; border: 0.5px solid var(--border2); border-radius: var(--radius); font-size: 12px; cursor: pointer; background: var(--bg); color: var(--text2); font-family: inherit; transition: all 0.15s; }
+  .fc-mode-btn.active { background: var(--blue-bg); color: var(--blue-text); border-color: var(--blue-border); font-weight: 500; }
+  .fc-write-area { width: 100%; border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 10px; font-family: inherit; font-size: 13px; color: var(--text); background: var(--bg); resize: none; margin-bottom: 8px; min-height: 100px; display: block; }
+  .fc-write-area:focus { outline: none; border-color: var(--blue-border); }
+  .fc-reveal-btn { display: block; width: 100%; padding: 9px; background: var(--bg); color: var(--text); border: 0.5px solid var(--border2); border-radius: var(--radius); font-size: 13px; cursor: pointer; font-family: inherit; margin-bottom: 8px; }
+  .fc-reveal-btn:hover { background: var(--bg2); }
+  .fc-compare { display: none; margin-bottom: 8px; }
+  .fc-compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
+  @media(max-width:520px){ .fc-compare-grid { grid-template-columns: 1fr; } }
+  .fc-col { border-radius: var(--radius); padding: 11px; font-size: 13px; line-height: 1.8; }
+  .fc-col-label { font-size: 11px; font-weight: 500; margin-bottom: 6px; }
+  .fc-col.mine { background: var(--bg2); border: 0.5px solid var(--border2); color: var(--text); }
+  .fc-col.mine .fc-col-label { color: var(--text2); }
+  .fc-col.correct { background: var(--green-bg); border: 0.5px solid var(--green-border); color: var(--text); border-right: 3px solid var(--green-border); }
+  .fc-col.correct .fc-col-label { color: var(--green-text); }
+  .fc-ai-btn { display: block; width: 100%; padding: 9px; background: var(--blue-bg); color: var(--blue-text); border: 0.5px solid var(--blue-border); border-radius: var(--radius); font-size: 13px; cursor: pointer; font-family: inherit; margin-bottom: 8px; }
+  .fc-ai-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .fc-ai-feedback { background: var(--bg2); border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 11px; font-size: 13px; line-height: 1.8; color: var(--text); margin-bottom: 8px; display: none; white-space: pre-wrap; }
+  .fc-submit-btn { display: block; width: 100%; padding: 9px; background: var(--blue-bg); color: var(--blue-text); border: 0.5px solid var(--blue-border); border-radius: var(--radius); font-size: 13px; cursor: pointer; font-family: inherit; margin-bottom: 8px; }
+  .fc-submit-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .fc-answer-reveal { background: var(--bg2); border-right: 3px solid var(--green-border); border-radius: var(--radius); padding: 11px; font-size: 13px; line-height: 1.8; color: var(--text); margin-bottom: 8px; display: none; }
+  .card.header-card { background: var(--blue-bg); border-color: var(--blue-border); }
+  .card.header-card h3 { color: var(--blue-text); border-bottom-color: var(--blue-border); } gap: 8px; background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 9px 13px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .api-bar label { font-size: 12px; color: var(--text2); white-space: nowrap; }
+  .api-bar input { flex: 1; min-width: 180px; border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 5px 9px; font-size: 12px; background: var(--bg2); color: var(--text); font-family: monospace; }
+  .api-bar input:focus { outline: none; border-color: var(--blue-border); }
+  .api-status { font-size: 11px; padding: 2px 8px; border-radius: 12px; white-space: nowrap; }
+  .api-status.ok { background: var(--green-bg); color: var(--green-text); }
+  .api-status.missing { background: var(--amber-bg); color: var(--amber-text); }
+  .loading-dots { animation: blink 1s infinite; display: inline-block; }
+  @keyframes blink { 0%,100%{opacity:1;}50%{opacity:.3;} }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>הכנה למבחן אזרחות — עידן</h1>
+    <p>למידה · שינון · תרגול שאלות ארוע</p>
+  </div>
+
+  <div class="api-bar">
+    <label>🔑 מפתח AI (אופציונלי):</label>
+    <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." oninput="saveApiKey(this.value)" />
+    <span class="api-status missing" id="api-status">לא מוגדר</span>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="showSection('learn',this)">📖 למידת מושגים</button>
+    <button class="tab" onclick="showSection('flash',this)">🃏 כרטיסיות שינון</button>
+    <button class="tab" onclick="showSection('event',this)">✍️ שאלות ארוע</button>
+    <button class="tab" onclick="showSection('exam2',this)">📝 מבחן 2</button>
+    <button class="tab" onclick="showSection('tips',this)">💡 טיפים לבגרות</button>
+  </div>
+
+  <!-- LEARN -->
+  <div id="section-learn" class="section visible">
+    <div id="topic-list">
+      <div class="topic-grid">
+        <button class="topic-btn" onclick="showTopic('democratic')"><span class="icon">🏛️</span><span class="name">עקרונות דמוקרטיים</span><span class="count">5 מושגים</span></button>
+        <button class="topic-btn" onclick="showTopic('elections')"><span class="icon">🗳️</span><span class="name">בחירות דמוקרטיות</span><span class="count">כ"ח משה + אר"י</span></button>
+        <button class="topic-btn" onclick="showTopic('supervision')"><span class="icon">👁️</span><span class="name">מנגנוני פיקוח</span><span class="count">2 מושגים</span></button>
+        <button class="topic-btn" onclick="showTopic('security')"><span class="icon">🛡️</span><span class="name">ביטחון ודמוקרטיה</span><span class="count">2 מושגים</span></button>
+        <button class="topic-btn" onclick="showTopic('economic')"><span class="icon">💰</span><span class="name">גישות כלכליות</span><span class="count">2 מושגים</span></button>
+        <button class="topic-btn" onclick="showTopic('history')"><span class="icon">📜</span><span class="name">רקע היסטורי</span><span class="count">3 מושגים</span></button>
+        <button class="topic-btn" onclick="showTopic('declaration')"><span class="icon">📋</span><span class="name">הכרזת העצמאות</span><span class="count">7 חלקים</span></button>
+        <button class="topic-btn" onclick="showTopic('jewish')"><span class="icon">✡️</span><span class="name">מאפיינים יהודיים</span><span class="count">7 חוקים + עמדות</span></button>
+      </div>
+    </div>
+    <div id="topic-content" style="display:none;"></div>
+  </div>
+
+  <!-- FLASH -->
+  <div id="section-flash" class="section">
+    <div id="flash-topic-list">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:10px;">בחר נושא לשינון:</p>
+      <div class="topic-grid">
+        <button class="topic-btn" onclick="startFlash('democratic')"><span class="icon">🏛️</span><span class="name">עקרונות דמוקרטיים</span></button>
+        <button class="topic-btn" onclick="startFlash('elections')"><span class="icon">🗳️</span><span class="name">בחירות דמוקרטיות</span></button>
+        <button class="topic-btn" onclick="startFlash('supervision')"><span class="icon">👁️</span><span class="name">מנגנוני פיקוח</span></button>
+        <button class="topic-btn" onclick="startFlash('economic')"><span class="icon">💰</span><span class="name">גישות כלכליות</span></button>
+        <button class="topic-btn" onclick="startFlash('declaration')"><span class="icon">📋</span><span class="name">הכרזת העצמאות</span></button>
+        <button class="topic-btn" onclick="startFlash('jewish')"><span class="icon">✡️</span><span class="name">חוקים יהודיים</span></button>
+        <button class="topic-btn" onclick="startFlash('all')"><span class="icon">⭐</span><span class="name">כל הנושאים</span></button>
+      </div>
+    </div>
+    <div id="flash-area" style="display:none;"></div>
+  </div>
+
+  <!-- EVENT QUESTIONS -->
+  <div id="section-event" class="section">
+    <div id="event-list">
+      <button class="gen-btn" onclick="generateNewQuestion()">✨ צור שאלת ארוע חדשה עם AI (על בסיס החומר)</button>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">או תרגל על שאלה קיימת:</p>
+      <button class="event-list-item" onclick="showEventQ(0)">
+        <div><div class="ev-title">ועדת הכנסת ותקציב הרווחה</div><div class="ev-sub">עקרונות דמוקרטיים ומנגנוני פיקוח</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(1)">
+        <div><div class="ev-title">בחירות וזכות הצבעה לטייסים</div><div class="ev-sub">תנאי בחירות דמוקרטיות</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(2)">
+        <div><div class="ev-title">חוק עסקים בשבת ועצומת דת</div><div class="ev-sub">מנגנוני פיקוח</div></div>
+        <span class="q-badge ai">✨ נוצר חדש</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(3)">
+        <div><div class="ev-title">מחאת סטודנטים נגד מחירי מזון</div><div class="ev-sub">מנגנוני פיקוח</div></div>
+        <span class="q-badge ai">✨ נוצר חדש</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(4)">
+        <div><div class="ev-title">זמר שסרב להופיע בשבת</div><div class="ev-sub">המאפיינים היהודיים של המדינה</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(5)">
+        <div><div class="ev-title">ממשלה שניסתה לדחות בחירות</div><div class="ev-sub">תנאי בחירות דמוקרטיות</div></div>
+        <span class="q-badge ai">✨ נוצר חדש</span>
+      </button>
+      <p style="font-size:12px;color:var(--text2);margin:10px 0 6px;font-weight:500;">📄 שאלות מקובץ הכנה למבחן 2:</p>
+      <button class="event-list-item" onclick="showEventQ(6)">
+        <div><div class="ev-title">משאל עם על שינוי שיטת בחירות</div><div class="ev-sub">עקרונות דמוקרטיים</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(7)">
+        <div><div class="ev-title">הצבעה במועצת תלמידים</div><div class="ev-sub">עקרונות דמוקרטיים</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(8)">
+        <div><div class="ev-title">חיפוש בטלפון ללא צו שופט</div><div class="ev-sub">עקרונות דמוקרטיים</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(9)">
+        <div><div class="ev-title">שליטת הממשלה על תקציב בתי המשפט</div><div class="ev-sub">עקרונות דמוקרטיים</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(10)">
+        <div><div class="ev-title">הצבעה רק לתושבים משלמי ארנונה</div><div class="ev-sub">תנאי בחירות דמוקרטיות</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(11)">
+        <div><div class="ev-title">קלפיות פתוחות ופתקים גלויים</div><div class="ev-sub">תנאי בחירות דמוקרטיות</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(12)">
+        <div><div class="ev-title">מפלגות חדשות לא יורשו להתמודד</div><div class="ev-sub">תנאי בחירות דמוקרטיות</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(13)">
+        <div><div class="ev-title">דוח מבקר על מחדלי הצפות</div><div class="ev-sub">מנגנוני פיקוח</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(14)">
+        <div><div class="ev-title">מחאת הורים על קיצוץ בצהרונים</div><div class="ev-sub">מנגנוני פיקוח</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(15)">
+        <div><div class="ev-title">שר מציע לצמצם מיסים וקצבאות</div><div class="ev-sub">גישות כלכליות-חברתיות</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(16)">
+        <div><div class="ev-title">ממשלה מעלה מס ומגדילה שירותי בריאות</div><div class="ev-sub">גישות כלכליות-חברתיות</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(17)">
+        <div><div class="ev-title">מסדרון השלום — שיתוף פעולה אזורי</div><div class="ev-sub">הכרזת העצמאות</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(18)">
+        <div><div class="ev-title">שיקום יישובי הדרום והצפון</div><div class="ev-sub">הכרזת העצמאות</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(19)">
+        <div><div class="ev-title">דרישה לשנות קריטריון אזרחות</div><div class="ev-sub">המאפיינים היהודיים של המדינה</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(20)">
+        <div><div class="ev-title">פקחים בחנויות בשבוע של פסח</div><div class="ev-sub">המאפיינים היהודיים של המדינה</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <p style="font-size:12px;color:var(--text2);margin:14px 0 6px;font-weight:500;border-top:0.5px solid var(--border);padding-top:12px;">📝 שאלות חזרה למבחן 3:</p>
+      <button class="event-list-item" onclick="showEventQ(21)">
+        <div><div class="ev-title">שרת תחבורה נגד עבודה בשבת</div><div class="ev-sub">המאפיינים היהודיים של המדינה</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(22)">
+        <div><div class="ev-title">הוועדה למינוי שופטים ערבים</div><div class="ev-sub">הכרזת העצמאות</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(23)">
+        <div><div class="ev-title">ראש ממשלה שדוחה בחירות ל-20 שנה</div><div class="ev-sub">תנאי בחירות דמוקרטיות</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(24)">
+        <div><div class="ev-title">שרת רווחה שמציעה להעלות מס</div><div class="ev-sub">גישות כלכליות-חברתיות</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <button class="event-list-item" onclick="showEventQ(25)">
+        <div><div class="ev-title">מועצת עיריית דקלים מצביעה על מרכז קהילתי</div><div class="ev-sub">עקרונות דמוקרטיים</div></div>
+        <span class="q-badge real">📄 מבחן אמיתי</span>
+      </button>
+      <div id="generated-questions"></div>
+    </div>
+    <div id="event-content" style="display:none;"></div>
+  </div>
+
+  <!-- EXAM 2 -->
+  <div id="section-exam2" class="section">
+    <div style="margin-bottom:1rem;">
+      <div style="background:var(--blue-bg);border:.5px solid var(--blue-border);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:10px;">
+        <p style="font-size:13px;color:var(--blue-text);font-weight:500;">📝 מבחן 2 — שאלות שעידן ענה עליהן בפועל</p>
+        <p style="font-size:12px;color:var(--blue-text);margin-top:3px;">כתוב תשובה חדשה, בדוק עם AI, וראה תשובה נכונה</p>
+      </div>
+
+      <!-- PART A -->
+      <p style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:8px;">חלק א' — שאלות ידע (ענה על 3 מתוך 5)</p>
+
+      <div class="card" id="exam2-q1">
+        <h3 style="font-size:14px;">שאלה 1 — ציינו והציגו שתי הצדקות להקמת מדינת ישראל מהכרזת העצמאות</h3>
+        <textarea class="fc-write-area" id="e2q1-ans" placeholder="כתוב כאן את תשובתך..."></textarea>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;">
+          <button class="fc-reveal-btn" style="flex:1;" onclick="toggleE2Answer('e2q1-correct')">👁️ הצג תשובה נכונה</button>
+          <button class="fc-ai-btn" style="flex:1;margin-bottom:0;" id="e2q1-ai-btn" onclick="checkE2WithAI('e2q1')">✨ AI בודק</button>
+        </div>
+        <div class="fc-answer-reveal" id="e2q1-correct">
+          <strong>תשובה נכונה:</strong><br>
+          שלושה סוגי הצדקות (בחר שתיים):<br><br>
+          <strong>א) טבעית-אוניברסלית:</strong> הזכות הטבעית והאוניברסלית של כל עם להגדרה עצמית, במיוחד עם שנמצא במצוקה (עם ישראל עבר את השואה).<br><br>
+          <strong>ב) משפטית-בינלאומית:</strong> הכרה בינלאומית בזכות העם היהודי — הצהרת בלפור, כתב המנדט, החלטה 181.<br><br>
+          <strong>ג) היסטורית:</strong> בה קם העם היהודי ויצר נכסי תרבות ובראשם התנ"ך; בגלות המשיך לשאוף לשוב; מאמץ לשיבה בדורות האחרונים; השואה הוכיחה ההכרח במדינה יהודית; השתתפות במלחמת העולם השנייה.
+        </div>
+        <div class="fc-ai-feedback" id="e2q1-fb"></div>
+      </div>
+
+      <div class="card" id="exam2-q2">
+        <h3 style="font-size:14px;">שאלה 2 — הציגו את החלטה 181 של האו"ם — תוכנית החלוקה</h3>
+        <textarea class="fc-write-area" id="e2q2-ans" placeholder="כתוב כאן את תשובתך..."></textarea>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;">
+          <button class="fc-reveal-btn" style="flex:1;" onclick="toggleE2Answer('e2q2-correct')">👁️ הצג תשובה נכונה</button>
+          <button class="fc-ai-btn" style="flex:1;margin-bottom:0;" id="e2q2-ai-btn" onclick="checkE2WithAI('e2q2')">✨ AI בודק</button>
+        </div>
+        <div class="fc-answer-reveal" id="e2q2-correct">
+          <strong>תשובה נכונה:</strong><br>
+          החלטת עצרת האו"ם ב-29 בנובמבר 1947 (כ"ט בנובמבר). להקים בתוך החלק שנותר מהמנדט בארץ ישראל המערבית — מדינה יהודית ומדינה ערבית. ירושלים תהיה עיר בשליטה בינלאומית. שתי המדינות יהיו דמוקרטיות, יקיימו בחירות וינסחו חוקה. ההנהגה היהודית קיבלה את התוכנית; ההנהגה הערבית דחתה אותה והערבים החלו בפעולות איבה — זהו השלב הראשון של מלחמת העצמאות.
+        </div>
+        <div class="fc-ai-feedback" id="e2q2-fb"></div>
+      </div>
+
+      <div class="card" id="exam2-q3">
+        <h3 style="font-size:14px;">שאלה 3 — הציגו מאפיין יהודי אחד ומאפיין דמוקרטי אחד הבאים לידי ביטוי בהכרזת העצמאות</h3>
+        <textarea class="fc-write-area" id="e2q3-ans" placeholder="כתוב כאן את תשובתך..."></textarea>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;">
+          <button class="fc-reveal-btn" style="flex:1;" onclick="toggleE2Answer('e2q3-correct')">👁️ הצג תשובה נכונה</button>
+          <button class="fc-ai-btn" style="flex:1;margin-bottom:0;" id="e2q3-ai-btn" onclick="checkE2WithAI('e2q3')">✨ AI בודק</button>
+        </div>
+        <div class="fc-answer-reveal" id="e2q3-correct">
+          <strong>מאפיינים יהודיים (בחר אחד):</strong><br>
+          • בשם המדינה: מדינת ישראל<br>
+          • בפתיחת שעריה לכל יהודי<br>
+          • בקריאה לעם היהודי להתלכד סביבה<br>
+          • בקביעה שהמדינה תושתת על מורשת נביאי ישראל<br><br>
+          <strong>מאפיינים דמוקרטיים (בחר אחד):</strong><br>
+          • שמירה על המקומות הקדושים לכל הדתות<br>
+          • הכרזה על הקמת מוסדות דמוקרטיים, בחירות, חוקה<br>
+          • הבטחה לשוויון זכויות לכל אזרחיה ללא הבדל דת גזע ומין<br>
+          • קריאה לערבים להשתתף בבניין המדינה על יסוד אזרחות מלאה ושווה
+        </div>
+        <div class="fc-ai-feedback" id="e2q3-fb"></div>
+      </div>
+
+      <div class="card" id="exam2-q4">
+        <h3 style="font-size:14px;">שאלה 4 — ציינו שני הבדלים בין הגישה הכלכלית-חברתית הליברלית לגישה הסוציאל-דמוקרטית</h3>
+        <textarea class="fc-write-area" id="e2q4-ans" placeholder="כתוב כאן את תשובתך..."></textarea>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;">
+          <button class="fc-reveal-btn" style="flex:1;" onclick="toggleE2Answer('e2q4-correct')">👁️ הצג תשובה נכונה</button>
+          <button class="fc-ai-btn" style="flex:1;margin-bottom:0;" id="e2q4-ai-btn" onclick="checkE2WithAI('e2q4')">✨ AI בודק</button>
+        </div>
+        <div class="fc-answer-reveal" id="e2q4-correct">
+          <strong>הבדל 1 — מה מודגש:</strong><br>
+          ליברלית: מדגישה חירות כלכלית על פני שוויון<br>
+          סוציאל-דמוקרטית: מדגישה שוויון חברתי-כלכלי על פני חירות כלכלית<br><br>
+          <strong>הבדל 2 — מעורבות המדינה:</strong><br>
+          ליברלית: מעורבות המדינה מינימלית, שוק חופשי<br>
+          סוציאל-דמוקרטית: מעורבות המדינה רחבה, רשת ביטחון סוציאלי<br><br>
+          <strong>הבדל 3 — מיסוי (בונוס):</strong><br>
+          ליברלית: תמיכה בצמצום מיסוי<br>
+          סוציאל-דמוקרטית: תמיכה במיסוי גבוה
+        </div>
+        <div class="fc-ai-feedback" id="e2q4-fb"></div>
+      </div>
+
+      <div class="card" id="exam2-q5">
+        <h3 style="font-size:14px;">שאלה 5 — הציגו את המושג מעצר מנהלי</h3>
+        <textarea class="fc-write-area" id="e2q5-ans" placeholder="כתוב כאן את תשובתך..."></textarea>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;">
+          <button class="fc-reveal-btn" style="flex:1;" onclick="toggleE2Answer('e2q5-correct')">👁️ הצג תשובה נכונה</button>
+          <button class="fc-ai-btn" style="flex:1;margin-bottom:0;" id="e2q5-ai-btn" onclick="checkE2WithAI('e2q5')">✨ AI בודק</button>
+        </div>
+        <div class="fc-answer-reveal" id="e2q5-correct">
+          <strong>תשובה נכונה:</strong><br>
+          מעצר מניעתי מידי ללא הליך פלילי רגיל כנגד העצור, גם בלי שהוא מואשם בביצוע עבירה כלשהי. מטרתו למנוע פגיעה בביטחון הציבור או ביטחון המדינה. בסמכות שר הביטחון בלבד. תקף לתקופה של 6 חודשים וניתן להארכה. הליך הנתון לביקורת רבה בשל הפגיעה הקשה בזכויות, ולכן חלות עליו הגבלות בחוק.
+        </div>
+        <div class="fc-ai-feedback" id="e2q5-fb"></div>
+      </div>
+
+      <!-- PART B+C EVENT QUESTIONS -->
+      <p style="font-size:13px;font-weight:500;color:var(--text);margin:16px 0 8px;padding-top:12px;border-top:.5px solid var(--border);">שאלות ארוע מהמבחן (חלקים ב' ו-ג')</p>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">לחץ על שאלה לתרגול מלא</p>
+      <div id="exam2-event-list">
+        <button class="event-list-item" onclick="showExam2EventQ(26)" style="margin-bottom:8px;">
+          <div><div class="ev-title">שאלה 6 — כנס נגד הסדר הציבורי הערבי</div><div class="ev-sub">שאלת ארוע מחלק ב'</div></div>
+          <span class="q-badge real">📝 מבחן 2</span>
+        </button>
+        <button class="event-list-item" onclick="showExam2EventQ(27)" style="margin-bottom:8px;">
+          <div><div class="ev-title">שאלה 7 — זמר שסרב להופיע בשבת (פסטיגל)</div><div class="ev-sub">שאלת ארוע מחלק ב'</div></div>
+          <span class="q-badge real">📝 מבחן 2</span>
+        </button>
+        <button class="event-list-item" onclick="showExam2EventQ(28)" style="margin-bottom:8px;">
+          <div><div class="ev-title">שאלה 8 — יוקר המחיה ורפורמה בחלב</div><div class="ev-sub">שאלת ארוע מחלק ב'</div></div>
+          <span class="q-badge real">📝 מבחן 2</span>
+        </button>
+        <button class="event-list-item" onclick="showExam2EventQ(29)" style="margin-bottom:8px;">
+          <div><div class="ev-title">שאלה 9 — מועצת תלמידים וטיול שנתי</div><div class="ev-sub">שאלת ארוע מחלק ג'</div></div>
+          <span class="q-badge real">📝 מבחן 2</span>
+        </button>
+        <button class="event-list-item" onclick="showExam2EventQ(30)" style="margin-bottom:8px;">
+          <div><div class="ev-title">שאלה 10 — בחירות ועדת קלפי</div><div class="ev-sub">שאלת ארוע מחלק ג'</div></div>
+          <span class="q-badge real">📝 מבחן 2</span>
+        </button>
+        <button class="event-list-item" onclick="showExam2EventQ(31)" style="margin-bottom:8px;">
+          <div><div class="ev-title">שאלה 11 — מחאת מחירי מזון ורשתות חברתיות</div><div class="ev-sub">שאלת ארוע מחלק ג'</div></div>
+          <span class="q-badge real">📝 מבחן 2</span>
+        </button>
+      </div>
+      <div id="exam2-event-content" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- TIPS -->
+  <div id="section-tips" class="section">
+    <div class="warn-box"><p><strong>הכלל הכי חשוב:</strong> ציין (שם המושג) ← הצג (הגדרה מלאה) ← ציטוט ← הסבר. בהסבר — אסור לחזור על הציטוט! חייבים לקשר בין הציטוט לבין ההגדרה במילים שלך.</p></div>
+    <div class="tip-card"><h4>כשנשאלים על "עקרון דמוקרטי" — 4 אפשרויות בלבד</h4><p>1. עקרון שלטון העם<br>2. עקרון הכרעת הרוב<br>3. עקרון הגבלת השלטון<br>4. עקרון הפרדת רשויות</p></div>
+    <div class="tip-card"><h4>כשנשאלים על "תנאי לבחירות דמוקרטיות" — כ"ח משה</h4><p><strong>כ</strong>לליות · <strong>ח</strong>שאיות · <strong>מ</strong>חזוריות · <strong>ש</strong>וויוניות · ה<strong>ת</strong>מודדות חופשית</p></div>
+    <div class="tip-card"><h4>כשנשאלים על "מאפיין שיטת הבחירות בישראל" — אר"י</h4><p><strong>א</strong>רצית · <strong>ר</strong>שימתית · <strong>י</strong>חסית</p></div>
+    <div class="tip-card"><h4>מנגנון פיקוח — שתי אפשרויות</h4><p>מוסדי/פורמלי: כנסת, מבקר מדינה, נציב תלונות, בית משפט<br>בלתי מוסדי/בלתי פורמלי: תקשורת, הפגנות, אמנות, מחאה, רשתות חברתיות</p></div>
+    <div class="tip-card" style="border-right: 3px solid var(--amber-border);"><h4>טעויות שחזרו במבחן הקודם של עידן</h4><p>
+      ✗ לא לכתוב "שלטון העם" — חייב לכתוב "עקרון שלטון העם"<br>
+      ✗ בהצג — לא מספיק תמצית, חייבים הגדרה מלאה עם כל הפרטים<br>
+      ✗ בהסבר — חייבים לקשר במפורש בין הציטוט לבין ההגדרה שכתבת<br>
+      ✗ לא לסיים ב"כך רואים" בלי שהסברת את הקישור לפני כן
+    </p></div>
+  </div>
+</div>
+
+<script>
+function saveApiKey(val){
+  localStorage.setItem('eidan_api_key',val.trim());
+  const st=document.getElementById('api-status');
+  if(val.trim().startsWith('sk-ant-')&&val.trim().length>20){st.textContent='✓ מוכן';st.className='api-status ok';}
+  else{st.textContent='לא מוגדר';st.className='api-status missing';}
+}
+function getApiKey(){
+  return (document.getElementById('api-key-input')?.value||'').trim()||localStorage.getItem('eidan_api_key')||'';
+}
+window.addEventListener('DOMContentLoaded',()=>{
+  const saved=localStorage.getItem('eidan_api_key');
+  if(saved){const inp=document.getElementById('api-key-input');if(inp){inp.value=saved;saveApiKey(saved);}}
+});
+const TOPICS={
+democratic:{title:"עקרונות דמוקרטיים",concepts:[
+{name:"עקרון שלטון העם",definition:"עקרון יסוד של הדמוקרטיה. כלל האזרחים הם הריבון/מקור הסמכות. האזרחים בוחרים שלטון של נציגים שייצגו אותם ואת האינטרסים שלהם — לזמן קצוב המוגדר בחוק.",keywords:["ריבון","מקור סמכות","נציגים","זמן קצוב"]},
+{name:"עקרון הכרעת הרוב",definition:"עקרון הקובע כי מתוך כמה אפשרויות נבחרת זו שרוב המצביעים תומכים בה. אסור לרוב לקבל החלטות שפוגעות באופן לא סביר בזכויות יסוד ובמיוחד בזכויות המיעוט.",keywords:["רוב","הצבעה","מיעוט","החלטה"]},
+{name:"עקרון הגבלת השלטון",definition:"השלטון מחזיק במשאבים: אנושיים (כח אדם/הון אנושי), כלכליים (כסף), מקורות מידע, מנגנוני אכיפה (צבא, משטרה) — המעניקים לו כוח ועוצמה רבה. לכן קיימת סכנה שהשלטון ינצל לרעה את כוחו תוך פגיעה בזכויות האדם והאזרח או בזכויות מיעוט וקבוצה. כדי למנוע עריצות השלטון יש צורך בפיקוח באמצעות כלים: הפרדת הרשויות ומנגנוני פיקוח וביקורת מוסדיים ולא מוסדיים.",keywords:["כוח","עוצמה","פיקוח","עריצות","מנגנוני אכיפה"]},
+{name:"עקרון הפרדת רשויות",definition:"פיצול הכוח השלטוני לשלוש רשויות: מחוקקת, מבצעת ושופטת — במטרה להגביל את השלטון (למנוע ריכוז הכוח בידי גורם שלטוני אחד, לקדם הגנה על זכויות האדם). לכל רשות סמכויות ייחודיות בתחומה אך לא בלעדיות/מוחלטות, ומתקיימים בין הרשויות יחסי איזון, ריסון, פיקוח ובקרה.",keywords:["מחוקקת","מבצעת","שופטת","איזון","ריסון"]},
+{name:"עריצות הרוב",definition:"⚠️ מושג בפני עצמו — לא חלק מהגדרת עקרון הכרעת הרוב! שימוש לרעה בעקרון הכרעת הרוב. כאשר הרוב פוגע לרעה בזכויות אדם בצורה בלתי מידתית ומקבל החלטות שימנעו מהמיעוט להפוך לרוב בהמשך.",keywords:["שימוש לרעה","בלתי מידתי","פגיעה במיעוט"]}
+]},
+elections:{title:"בחירות דמוקרטיות",concepts:[
+{name:"⭐ כ\"ח משה — חמשת התנאים לקיומן של בחירות דמוקרטיות",definition:"כ\"ח משה הוא הסימון לזכור את חמשת התנאים:\nכ — כלליות\nח — חשאיות\nמ — מחזוריות\nש — שוויוניות\nה — התמודדות חופשית הוגנת",keywords:["כח משה","5 תנאים","זכרון"]},
+{name:"תנאי 1: כלליות",definition:"כל אזרחי המדינה זכאים לבחור ולהיבחר למוסדות הנבחרים במדינה במגבלות הכתובות בחוק (כמו גיל מינימלי ובמדינות מסוימות עבריינות על החוק).",keywords:["כל אזרח","זכות לבחור","זכות להיבחר"]},
+{name:"תנאי 2: חשאיות",definition:"איש מלבד הבוחר לא יודע במי בחר.\nמובטח שהבוחר לא יושפע מלחצים של גורמים שונים.",keywords:["לא יודע","קלפי","לחץ"]},
+{name:"תנאי 3: מחזוריות",definition:"הבחירות חוזרות במרווחי זמן ידועים וסדירים הקבועים בחוק.",keywords:["מרווחי זמן","סדירות","קבועים בחוק"]},
+{name:"תנאי 4: שוויוניות",definition:"קולו של כל מצביע שווה למשנהו.",keywords:["קול שווה","שוויון"]},
+{name:"תנאי 5: התמודדות חופשית הוגנת",definition:"הבחירות מאפשרות תחרות הוגנת המבוססת על חירויות וזכויות פוליטיות.\nבמיוחד: חופש הביטוי וחופש ההתאגדות.",keywords:["תחרות הוגנת","חופש ביטוי","התאגדות"]},
+{name:"⭐ אר\"י — מאפייני שיטת הבחירות בישראל",definition:"אר\"י הוא הסימון לזכור את שלושת המאפיינים:\nא — ארצית\nר — רשימתית\nי — יחסית",keywords:["ארי","3 מאפיינים","שיטת בחירות"]},
+{name:"מאפיין 1: ארצית",definition:"כל הארץ מהווה אזור בחירה אחד לצורך חישוב התוצאות.",keywords:["אזור בחירה אחד","כל הארץ"]},
+{name:"מאפיין 2: רשימתית",definition:"מצביעים למפלגה שלה רשימת מועמדים שנבחרה מראש (קבועה מראש או המושפעת מהצבעת הבוחרים).\nבדרך כלל הרשימה נקבעת באמצעות בחירות מוקדמות כמו פריימריז, או בחירות במוסדות המפלגה/ראש הרשימה.",keywords:["פריימריז","מועמדים","מפלגה","רשימה"]},
+{name:"מאפיין 3: יחסית",definition:"חלוקת המושבים בכנסת בהתאם למספר הקולות שבהם זכתה כל רשימת מועמדים.\nהחישוב נעשה לפי מספר המצביעים בבחירות או לפי הקולות הכשרים בלבד.\nבתנאי שהמפלגה עברה את אחוז החסימה.",keywords:["מושבים","יחסי","אחוז חסימה","קולות"]}
+]},
+supervision:{title:"מנגנוני פיקוח וביקורת",concepts:[
+{name:"מנגנון פיקוח וביקורת מוסדי (פורמלי)",definition:"ביקורת שמקיימים גופים ומוסדות שלטוניים: הרשות המחוקקת (אופוזיציה, ועדות הכנסת, כלים פרלמנטריים), מבקר המדינה, נציב תלונות הציבור ומערכת המשפט. שהוסמכו לשם כך בחוק, לשם הגבלת השלטון וחוקיות פעולותיו. באמצעות פרסום דוחות/הנחיות/חוקים/מסמכים רשמיים המציגים את פעולות השלטון.",keywords:["חוק","מבקר","כנסת","בית משפט","נציב","רשמי"]},
+{name:"מנגנון פיקוח וביקורת לא מוסדי (בלתי פורמלי)",definition:"ביקורת שמקיימים גופים, ארגונים או פרטים באמצעות: הפגנות, מחאות, שביתות, עצרות, עצומות, יצירות אמנות (קולנוע, טלוויזיה, תיאטרון, ספרות, אמנות פלסטית), הופעה וכתיבה באמצעי התקשורת וברשתות החברתיות. ללא הסמכה חוקית אלא מיוזמתם של אזרחים או קבוצות. לשם הגבלת השלטון וחוקיות פעולותיו באמצעות לחץ והבעת ביקורת פוליטית על קובעי מדיניות.",keywords:["הפגנה","מחאה","תקשורת","אמנות","שביתה","ללא הסמכה"]}
+]},
+security:{title:"ביטחון ודמוקרטיה",concepts:[
+{name:"חקיקת חירום",definition:"הממשלה מוסמכת להתקין תקנה לשעת חירום לטובת הגנת המדינה, ביטחון הציבור וקיום אספקה ושירותים חיוניים. ייחודן: אף שהן חקיקת משנה, הן יכולות לגבור על הוראות חוק (למעט חוקים חסינים: חוק-יסוד כבוד האדם וחירותו, חוק-יסוד חופש העיסוק, חוק-יסוד הכנסת). לפי החוק ניתן להתקינן רק כאשר מוכרז מצב חירום על-ידי הכנסת. בפועל — מאז הקמת המדינה מוכרז בה מצב חירום, וההכרזה מתחדשת אחת לשנה.",keywords:["מצב חירום","כנסת","חקיקת משנה","גוברת על חוק"]},
+{name:"מעצר מנהלי",definition:"מעצר מניעתי מידי ללא הליך פלילי רגיל כנגד העצור, גם בלי שהוא מואשם בביצוע עבירה כלשהי. מטרתו למנוע פגיעה בביטחון הציבור או ביטחון המדינה. בסמכות שר הביטחון בלבד. תקף לתקופה של 6 חודשים וניתן להארכה. הליך הנתון לביקורת רבה בשל הפגיעה הקשה בזכויות, ולכן חלות עליו הגבלות בחוק.",keywords:["שר ביטחון","6 חודשים","ללא אישום","מניעתי","פגיעה בזכויות"]}
+]},
+economic:{title:"גישות כלכליות-חברתיות",concepts:[
+{name:"הגישה הליברלית",definition:"מדגישה את החירות הכלכלית על פני השוויון החברתי-כלכלי.\nדגש על יוזמה פרטית ותחרות.\nדוגלת בפעילות במסגרת שוק חופשי.\nמעורבות המדינה בתחום החברתי-כלכלי היא מינימלית.\nתמיכה בצמצום המיסוי למינימום.\nדוגמאות למדיניות: הפרטה, קיצוץ תקציבים, צמצום קצבאות.",keywords:["חירות כלכלית","שוק חופשי","הפרטה","מיסוי נמוך","יוזמה פרטית"]},
+{name:"הגישה הסוציאל-דמוקרטית",definition:"מדגישה את השוויון החברתי-כלכלי על פני החירות הכלכלית.\nדוגלת בצמצום פערים.\nבמקרה הצורך הפרט החלש יכול להישען על סיוע חברתי-כלכלי מהמדינה.\nהמדינה מעורבת בתחום החברתי-כלכלי במידה רבה.\nמחויבות ליצור רשת ביטחון סוציאלי רחבה ולהבטיח קיום בסיסי בכבוד לכל אדם.\nתמיכה במיסוי גבוה על העשירונים העליונים.\nדוגמאות למדיניות: סבסוד שירותים, הענקת שירותים חברתיים, חקיקה חברתית, הלאמה.",keywords:["שוויון","פערים","רשת ביטחון","מיסוי גבוה","הלאמה","סבסוד"]}
+]},
+history:{title:"רקע היסטורי להקמת המדינה",concepts:[
+{name:"הצהרת בלפור (1917)",definition:"מכתב ששלח שר החוץ הבריטי בלפור בשנת 1917 ללורד היהודי רוטשילד. מודיע על החלטת ממשלת בריטניה לקדם הקמת בית לאומי לעם היהודי בארץ ישראל. זוהי הצדקה משפטית-בינלאומית לזכות העם היהודי על הארץ.",keywords:["1917","בריטניה","בית לאומי","רוטשילד"]},
+{name:"כתב המנדט (1922)",definition:"הסמכה לבריטניה על ידי חבר הלאומים בשנת 1922 להקים בית לאומי לעם היהודי בארץ ישראל (יישום הצהרת בלפור). המנדט (יחידת שליטה) ניתן על ארץ ישראל משני עברי הירדן. המנדט מדגיש את הצורך לשמור את הזכויות האזרחיות והדתיות של לא-יהודים בארץ ישראל.",keywords:["1922","חבר הלאומים","מנדט","שני עברי הירדן"]},
+{name:"החלטה 181 — תוכנית החלוקה (29.11.1947)",definition:"החלטת עצרת האו\"ם ב-29 בנובמבר 1947 (כ\"ט בנובמבר). להקים בתוך החלק שנותר מהמנדט בארץ ישראל המערבית — מדינה יהודית ומדינה ערבית. ירושלים תהיה עיר בשליטה בינלאומית. שתי המדינות יהיו דמוקרטיות, יקיימו בחירות וינסחו חוקה. ההנהגה היהודית קיבלה את התוכנית. ההנהגה הערבית דחתה אותה והערבים החלו בפעולות איבה — זהו השלב הראשון של מלחמת העצמאות.",keywords:["29.11.1947","כ\"ט בנובמבר","או\"ם","מדינה יהודית","מדינה ערבית","מלחמת העצמאות"]}
+]},
+declaration:{title:"הכרזת העצמאות",concepts:[
+{name:"הכרזת העצמאות — הגדרה",definition:"מסמך ההכרזה על מדינת ישראל שנחתם על ידי דוד בן גוריון וחברי מועצת העם (נציגי היישוב היהודי בארץ ישראל). הוכרזה בה' באייר תש\"ח (14 במאי 1948), בתל אביב, בעיצומה של מלחמת העצמאות. כוללת ארבעה חלקים: היסטורי, מעשי/ביצועי/אופרטיבי, הצהרתי, מדיני (פניות לגורמים שונים).",keywords:["בן גוריון","14.5.1948","תל אביב","ארבעה חלקים","מועצת העם"]},
+{name:"החלק ההיסטורי — הצדקות",definition:"שלושה סוגי הצדקות להקמת מדינת ישראל:\nא) טבעית-אוניברסלית — הזכות הטבעית והאוניברסלית של כל עם להגדרה עצמית, במיוחד עם שנמצא במצוקה (עם ישראל עבר את השואה).\nב) משפטית-בינלאומית — הכרה בינלאומית בזכות העם היהודי על ידי החלטות רשמיות: הצהרת בלפור, כתב המנדט, החלטה 181.\nג) היסטורית — 5 טיעונים: (1) בה קם העם היהודי, התעצב ויצר נכסי תרבות ובראשם התנ\"ך. (2) במהלך הגלות המשיך העם בתקווה ובמאמץ לשוב לארץ. (3) נעשה מאמץ לשיבה לארץ בדורות האחרונים שהביא להקמת ישוב גדול. (4) השואה הוכיחה את הכרח הפתרון על ידי מדינה יהודית. (5) השתתפות היישוב במלחמת העולם השנייה הקנתה לו את הזכות להימנות על עמי האו\"ם.",keywords:["הצדקה טבעית","הצדקה משפטית","הצדקה היסטורית","שואה","גלות","תנ\"ך"]},
+{name:"החלק האופרטיבי-מעשי",definition:"הצהרה על הקמת מדינת ישראל, מוסדות השלטון והסמכויות שלהם, מבנה המערכת הפוליטית, הבחירות, המשטר הדמוקרטי — כינון חוקה. חלק זה מאפשר להקים רשויות שלטון ולנהל באופן מעשי את המדינה.",keywords:["הקמת מדינה","מוסדות שלטון","בחירות","חוקה"]},
+{name:"החלק ההצהרתי — אופי המדינה",definition:"חלק זה עוסק בערכים ובעקרונות עליהם תתבסס המדינה: עלייה יהודית; הזכויות הטבעיות של בני האדם; ערכי החירות והשוויון — חופש דת ומצפון, שוויון זכויות לכל האזרחים ללא הבדל דת גזע ומין; שמירה על המקומות הקדושים לכל הדתות.",keywords:["עלייה","שוויון","חירות","דת","זכויות"]},
+{name:"החלק המדיני — פניות לגורמים",definition:"הכרזה פונה לארבעה גורמים:\n• לאו\"ם — לשיתוף פעולה בהגשמת החלטת החלוקה ולקבל את ישראל לתוך משפחת העמים.\n• לערבים תושבי מדינת ישראל — לשמור על השלום, לקחת חלק בהקמת המדינה, על יסוד אזרחות מלאה ושווה וייצוג מתאים בכל מוסדותיה.\n• למדינות השכנות — מושיטים יד לשלום ושכנות טובה, לשיתוף פעולה לקידום המזרח התיכון כולו.\n• לעם היהודי בתפוצות — להתלכד סביב הישוב היהודי ולסייע במערכה הגדולה.",keywords:["או\"ם","ערבים","מדינות שכנות","תפוצות","אזרחות מלאה"]},
+{name:"מאפיינים יהודיים בהכרזה",definition:"• בשם המדינה: מדינת ישראל.\n• בפתיחת שעריה לכל יהודי.\n• בקריאה לעם היהודי להתלכד סביבה.\n• בקביעה כי המדינה תושתת על יסודות החרות, הצדק והשלום במורשתם של נביאי ישראל.",keywords:["שם המדינה","שערים לכל יהודי","מורשת נביאי ישראל"]},
+{name:"מאפיינים דמוקרטיים בהכרזה",definition:"• שמירה על המקומות הקדושים לכל הדתות.\n• פיתוח הארץ לטובת כל תושביה.\n• הכרזה על הקמת מוסדות דמוקרטיים, קיום בחירות, כינון חוקה.\n• הבטחה לשוויון זכויות חברתי ומדיני לכל אזרחיה ללא הבדל דת, גזע ומין.\n• הבטחה להיות נאמנים לעקרונותיה של מגילת האו\"ם.\n• קריאה לערבים תושבי המדינה להשתתף בבניין המדינה על יסוד אזרחות מלאה ושווה.\n• הבטחה להעניק לערבים אזרחי ישראל נציגות מתאימה בכל מוסדות המדינה.",keywords:["מוסדות דמוקרטיים","שוויון","בחירות","חוקה","אזרחות שווה"]}
+]},
+jewish:{title:"המאפיינים היהודיים של מדינת ישראל",concepts:[
+{name:"חוק שעות עבודה ומנוחה",
+definition:"📋 מה החוק: החוק מגדיר את שעות העבודה וימי העבודה ומנוחה במשק. ליהודים נקבע שבת כיום השבתון השבועי. ללא יהודים — יום המנוחה הוא לפי בחירתם (שישי, שבת, או ראשון).\n\n🔗 ממה נובע: חוק זה נובע ממצוות דתיות והלכתיות. הוא מתבסס על מצוות שמירת השבת.\n\n🎯 מטרת החוק: לאפשר שמירה של יום השבת והחגים בהתאם להלכה היהודית; לאפשר מנוחה ושמירה על תנאי העסקה הוגנים.\n\n✡️ למה זה מאפיין יהודי: החוק מבטא את מצוות שמירת השבת שהיא יום קדוש לפי היהדות.",
+keywords:["שבת","שבתון","מצוות","הלכה","מנוחה"]},
+{name:"חוק בתי הדין הרבניים",
+definition:"📋 מה החוק: יהודים בישראל מחויבים להתחתן ולהתגרש במסגרת בתי הדין הרבניים של בני דתם. נישואין וגירושין נערכים לפי דיני תורה בבתי הדין הרבניים. (החל מ-2010 המדינה מאפשרת נישואין אזרחיים לאחרים שאינם חסרי דת).\n\n🔗 ממה נובע: החוק נובע מההלכה היהודית ומהסדר הסטטוס קוו בין הדתי לאזרחי.\n\n🎯 מטרת החוק: לשמור על אחידות בקרב האוכלוסייה היהודית; לחבר בין הלאום היהודי לדת היהודית; לאפשר נישואין בין יהודים לפי ההלכה.\n\n✡️ למה זה מאפיין יהודי: מגשים את הפן הדתי והלאומי ומבטא את הסדר הסטטוס קוו.",
+keywords:["נישואין","גירושין","הלכה","רבניים","סטטוס קוו"]},
+{name:"חוק חג המצות",
+definition:"📋 מה החוק: החוק אוסר על בעלי עסקים הצגה ומכירת חמץ במרחבי אזורים יהודים במהלך ימי חג הפסח. החוק אינו אוסר אכילת חמץ.\n\n🔗 ממה נובע: החוק נובע ממצוות הדת היהודית — הציווי ההלכתי האוסר חמץ בפסח.\n\n🎯 מטרת החוק: לצמצם מכירת וקניית חמץ במרחב הציבורי; לסייע לשמור על הציווי ההלכתי האוסר אכילת חמץ בפסח.\n\n✡️ למה זה מאפיין יהודי: מבטא את מצוות אי אכילת חמץ לפי ההלכה היהודית.",
+keywords:["חמץ","פסח","מרחב ציבורי","מצוות"]},
+{name:"חוק השבות",
+definition:"📋 מה החוק: כל יהודי זכאי לעלות לארץ. החוק מאפשר גם לבני זוג, ילדים ונכדים של יהודים ובני הזוג שלהם לעלות לארץ (אף שאינם רשומים כיהודים).\n\n🔗 ממה נובע: החוק נובע מהתפיסה שמדינת ישראל היא מדינת הלאום של כל יהודי העולם.\n\n🎯 מטרת החוק: לעודד עלייה של כל יהודי לארץ ישראל; לחזק את הרוב היהודי במדינה; לבסס את אופיה היהודי של מדינת ישראל.\n\n✡️ למה זה מאפיין יהודי: מרכזי לביסוס אופיה היהודי — מגדיר את ישראל כמולדת לאומית של כל יהודי העולם.",
+keywords:["עלייה","זכאי","יהודי","נכדים","מדינת הלאום"]},
+{name:"חוק יסוד: ישראל — מדינת הלאום",
+definition:"📋 מה החוק: מעגן את אופיה היהודי של מדינת ישראל ומגדיר אותה כמדינת הלאום של העם היהודי. חוק יסוד בלתי נפרד מחוקי היסוד של המדינה — מהווה תשתית לחוקה עתידית. אינו ניתן לשינוי אלא ברוב של 61 חברי כנסת.\n\n📌 כל הנושאים שהחוק קובע (ידע את כולם, בחר 3 לשינון):\n1. ארץ ישראל היא מולדתו ההיסטורית של העם היהודי; לעם היהודי זכות טבעית להגדרה עצמית, זכות שבמדינת ישראל היא ייחודית לעם היהודי.\n2. סמלי המדינה: המנורה (ענפי הזית), דגל ישראל, המנון \"התקווה\" — מעוגנים בחוק יסוד.\n3. שפת המדינה — עברית; לשפה הערבית מעמד מיוחד.\n4. המדינה תעודד התיישבות יהודית.\n5. המדינה מעגנת את הקשר עם היהדות בתפוצות.\n6. השפה העברית היא השפה הרשמית היחידה; לערבית מעמד מיוחד.\n7. החוק אינו ניתן לשינוי אלא ברוב של 61 חברי כנסת.",
+keywords:["מדינת לאום","עברית","סמלים","הגדרה עצמית","התיישבות יהודית","61 חברי כנסת"]},
+{name:"חוק יסודות המשפט",
+definition:"📋 מה החוק: החוק מתייחס למקרים בהם אין חקיקה ראשית לנושא שבו דנים שופטים. החוק מנחה את בית המשפט לפסוק לפי \"עקרונות החירות הצדק והיושר שבמורשת ישראל\" — במקרים בהם אין חקיקה או התייחסות משפטית כלשהי.\n\n🔗 ממה נובע: מהרצון לשלב את המורשת התרבותית היהודית במערכת המשפט הישראלית.\n\n🎯 מטרת החוק: לבסס את התרבות היהודית ומורשת ישראל בקרב שופטי ישראל.\n\n✡️ למה זה מאפיין יהודי: קובע שהבסיס המשפטי במדינה מבוסס גם על המורשת והתרבות היהודית ולא רק על ערכים אוניברסליים.",
+keywords:["מורשת ישראל","שופטים","משפט עברי","חירות צדק יושר"]},
+{name:"החוק לעשיית דין בנאצים ובעוזריהם",
+definition:"📋 מה החוק: החוק קובע כללי ענישה מיוחדים (כולל עונש מוות) על פשעי נאצים ועוזריהם — גם אם בוצעו לפני הקמת המדינה ומחוץ לגבולותיה. הענישה מתייחסת לפשעים שנעשו כנגד היהודים.\n\n🔗 ממה נובע: מהיות ישראל מדינת העם היהודי כולו, אחראית להגנה על ההיסטוריה המשותפת של העם.\n\n🎯 מטרת החוק: למצות את הדין עם פושעי נאצים.\n\n✡️ למה זה מאפיין יהודי: נותן ביטוי להיסטוריה המשותפת של העם היהודי ולהיות ישראל מדינת העם היהודי כולו — גם בענייני עבר שהתרחשו מחוץ לגבולותיה.",
+keywords:["נאצים","עונש מוות","פשעים כנגד יהודים","שואה","מחוץ לגבולות"]},
+{name:"עמדות על הזהות הדתית הרצויה של המדינה",
+definition:"ארבע עמדות — יש לדעת את ההגדרה המלאה של כל עמדה:\n\n1️⃣ מדינה חילונית (הפרדה מלאה בין דת למדינה):\nמקור הסמכות: ציבור האזרחים. המדינה יהודית מבחינה לאומית, אך יש להפריד לחלוטין בין הדת והמורשת היהודית לבין המדינה/המוסדות הפוליטיים (למעט סמלים). אין זה מתפקידה של המדינה לחוקק חוקים דתיים, להעניק שירותים דתיים או להתערב בענייני דת — אך עליה לאפשר פולחן דתי פרטי.\n\n2️⃣ מדינה מסורתית-תרבותית:\nמקור הסמכות: ציבור האזרחים. מדינת ישראל כמדינת העם היהודי צריכה לתת ביטוי בחקיקה ובמרחב הציבורי למורשת היהודית במובן התרבותי והלאומי, מתוך זיקה למורשת/מסורת — אך ללא מחויבות להלכה.\n\n3️⃣ מדינה המשלבת חקיקה דתית הלכתית בהיקף חלקי:\nמקור הסמכות: ציבור האזרחים. למדינה יעד דתי, לכן עליה לשלב מרכיבים הלכתיים בחקיקה ובמרחב הציבורי. בין שני היסודות — הדתי והדמוקרטי — עשוי להיווצר מתח, ולכן יש לחתור לפתרונות. יהדות המדינה תתבטא בחיזוק האופי ההלכתי בעיקר במרחב הציבורי ובתחום המעמד האישי (שבת, כשרות, נישואין, גיור) ובשילוב המשפט העברי בחקיקה.\n\n4️⃣ מדינת הלכה:\nמקור הסמכות: ההלכה היהודית — ולא ציבור האזרחים (בשונה מדמוקרטיה). חוקי המדינה ייקבעו על פי דיני התורה בכל תחומי החיים. בקרב המחזיקים בעמדה זו יש תפיסות שונות לגבי מידת האכיפה בביתו הפרטי של האזרח. המדינה לא תהיה דמוקרטית, אם כי יתכן שיתקיימו בה מאפיינים דמוקרטיים מסוימים.",
+keywords:["חילונית","מסורתית","הלכה","הפרדה","מקור סמכות","מתח דת ודמוקרטיה"]}
+]}};
+
+
+const FLASHCARDS={};
+Object.keys(TOPICS).forEach(k=>{FLASHCARDS[k]=TOPICS[k].concepts.map(c=>({q:c.name,a:c.definition,topic:c.name}));});
+FLASHCARDS.all=Object.values(FLASHCARDS).flat();
+
+const EVENT_QUESTIONS=[
+  {title:"ועדת הכנסת ותקציב הרווחה",badge:"real",passage:"ממשלת ישראל החליטה לקצץ בתקציבי הרווחה ולצמצם קצבאות לנכים, אמהות חד הוריות ומובטלים. התוכנית הובאה לאישור בפני ועדת הכספים של הכנסת, ושם נמתחה עליה ביקורת קשה על ידי חברי כנסת רבים. שר האוצר טען כי מקבלי הקצבאות חייבים לפרנס את עצמם.",question:"ציינו והציגו את העיקרון הדמוקרטי שבשמו פעלה ועדת הכספים של הכנסת. צטטו משפט שממנו לומדים שעיקרון זה בא לידי ביטוי. הסבירו.",hints:{ciyen:"עקרון הגבלת השלטון",hatseg:"השלטון מחזיק במשאבים רבים (אנושיים, כלכליים, מנגנוני אכיפה) המעניקים לו כוח. לכן קיימת סכנה שינצל לרעה. כדי למנוע עריצות — פיקוח באמצעות הפרדת רשויות ומנגנוני פיקוח.",tzitut:"\"התוכנית הובאה לאישור בפני ועדת הכספים של הכנסת ושם נמתחה עליה ביקורת קשה על ידי חברי כנסת רבים\"",hesber:"ועדת הכספים = מנגנון פיקוח מוסדי שפיקח על הממשלה (=השלטון) ומנע ממנה לעשות כרצונה, ובכך מנע עריצות שלטון."}},
+  {title:"בחירות וזכות הצבעה לטייסים",badge:"real",passage:"יו\"ר איגוד הטייסים הצהיר כי ביום הבחירות ישהו בחו\"ל כ-200 אנשי צוות אוויר. הוא טען שבמצב כזה נמנעת מהם האפשרות להצביע. הוא הציע לאפשר להם להצביע כמה ימים לפני מועד הבחירות בקלפי בשדה התעופה, וכך לאפשר להם לממש את זכותם האזרחית.",question:"ציינו והציגו את התנאי ההכרחי לקיום בחירות דמוקרטיות שיתממש בהצעתו. צטטו. הסבירו.",hints:{ciyen:"כלליות",hatseg:"כל אזרחי המדינה זכאים לבחור ולהיבחר למוסדות הנבחרים במגבלות הכתובות בחוק.",tzitut:"\"יושב ראש איגוד הטייסים הציע לאפשר להם להצביע כמה ימים לפני מועד הבחירות בקלפי שתוצב בשדה התעופה\"",hesber:"אנשי הצוות = אזרחים שבשל עבודתם לא יכלו לממש זכות הבחירה. ההצעה מאפשרת לכולם לבחור ובכך מקיימת את תנאי הכלליות."}},
+  {title:"חוק עסקים בשבת ועצומת דת",badge:"ai",passage:"שר האוצר הציע להרחיב את פתיחת מרכזי הקניות בשבת כדי לסייע לצמיחה הכלכלית. בתגובה, ארגוני הדת הגישו עצומה עם עשרות אלפי חתימות נגד ההצעה וקראו לראש הממשלה לדחות אותה.",question:"ציינו והציגו את סוג מנגנון הפיקוח והביקורת שבא לידי ביטוי בפעולת ארגוני הדת. צטטו. הסבירו.",hints:{ciyen:"מנגנון פיקוח וביקורת בלתי מוסדי (בלתי פורמלי)",hatseg:"ביקורת שמקיימים גופים, ארגונים או פרטים: הפגנות, מחאות, עצומות, רשתות חברתיות — ללא הסמכה חוקית, מיוזמת אזרחים.",tzitut:"\"ארגוני הדת הגישו עצומה עם עשרות אלפי חתימות נגד ההצעה\"",hesber:"ארגוני הדת = גופים פרטיים ללא הסמכה חוקית. עצומה = כלי מחאה בלתי פורמלי. מטרתם — להגביל את פעולת הממשלה."}},
+  {title:"מחאת סטודנטים נגד מחירי מזון",badge:"ai",passage:"לאחר שחברת מזון גדולה העלתה מחירים בצורה חדה, קבוצת סטודנטים פתחה עמוד פייסבוק שקרא לחרם על המוצרים. הם הפיצו תמונות של מוצרים זולים יותר ודרשו הורדת מחירים. בתגובה לסערה הציבורית נאלצה הנהלת החברה לסגור את הנושא.",question:"ציינו והציגו את סוג מנגנון הפיקוח והביקורת שבא לידי ביטוי בפעולת הסטודנטים. צטטו. הסבירו.",hints:{ciyen:"מנגנון פיקוח וביקורת בלתי מוסדי (בלתי פורמלי)",hatseg:"ביקורת שמקיימים גופים, ארגונים או פרטים: הפגנות, מחאות, רשתות חברתיות — ללא הסמכה חוקית.",tzitut:"\"קבוצת סטודנטים פתחה עמוד פייסבוק שקרא לחרם על המוצרים\"",hesber:"הסטודנטים = אזרחים פרטיים ללא הסמכה חוקית, שפעלו ברשתות החברתיות = כלי בלתי פורמלי, לשם ביקורת על התנהלות החברה."}},
+  {title:"זמר שסרב להופיע בשבת",badge:"real",passage:"אחד הזמרים האהובים בישראל עומר אדם, חתם עם הפקת הפסטיגל כי הוא אינו מוכן להופיע בשבת. בעקבות כך דווח כי לראשונה המופע הקבוע של ימי החנוכה לא יחלל שבת. הזמר שידוע כשומר שבת הצליח לשנות את חוקי הפורמט — ומופעי הפסטיגל בחנוכה הקרוב לא יתקיימו ביום המנוחה של העם היהודי.",question:"ציינו והציגו את החוק שבא לידי ביטוי בסירוב הזמר. צטטו. הסבירו.",hints:{ciyen:"חוק שעות עבודה ומנוחה",hatseg:"החוק מגדיר שעות עבודה וימי מנוחה. ליהודים נקבע שבת כיום השבתון השבועי. מאפיין יהודי כי מבטא מצוות שמירת השבת.",tzitut:"\"הזמר שידוע כשומר שבת הצליח לשנות את חוקי הפורמט — ומופעי הפסטיגל בחנוכה הקרוב לא יתקיימו ביום המנוחה של העם היהודי\"",hesber:"הזמר = יהודי שמר שבת בהתאם לחוק שעות עבודה ומנוחה. סירובו להופיע בשבת = מימוש חוק היום השבתון = ביטוי למאפיין היהודי של המדינה."}},
+  {title:"ממשלה שניסתה לדחות בחירות",badge:"ai",passage:"בשל מצב ביטחוני מורכב, ראש הממשלה הציע לדחות את מועד הבחירות לכנסת בשישה חודשים. חברי האופוזיציה יצאו בחריפות נגד ההצעה וטענו כי מדובר בפגיעה ישירה בדמוקרטיה. בית המשפט העליון דחה את ההצעה ופסק שהבחירות יתקיימו במועד הקבוע בחוק.",question:"ציינו והציגו את התנאי ההכרחי לקיום בחירות דמוקרטיות שנפגע בהצעת ראש הממשלה. צטטו. הסבירו.",hints:{ciyen:"מחזוריות",hatseg:"הבחירות חוזרות במרווחי זמן ידועים וסדירים הקבועים בחוק.",tzitut:"\"ראש הממשלה הציע לדחות את מועד הבחירות לכנסת בשישה חודשים\"",hesber:"הצעת ראש הממשלה = שינוי המועד הקבוע בחוק = פגיעה בתנאי המחזוריות הדורש בחירות בזמנים קצובים וסדירים."}},
+  {title:"משאל עם על שינוי שיטת בחירות",badge:"real",passage:"במדינה דמוקרטית התעורר ויכוח סביב הצעה לשינוי שיטת הבחירות. הממשלה החליטה לא להסתפק בהצבעה רגילה — היא הכריזה על יום בחירה מיוחד שבו כל בעלי זכות הבחירה יתבקשו לענות בכן או לא על השאלה. ראש הממשלה הסביר: \"בנושא כה עקרוני, אנו רוצים להחזיר את ההחלטה לידי האזרחים, שהם בעלי הבית האמיתיים במדינה\".",question:"ציינו והציגו את העיקרון הדמוקרטי שבא לידי ביטוי בדברי ראש הממשלה. צטטו. הסבירו.",hints:{ciyen:"עקרון שלטון העם",hatseg:"עקרון יסוד של הדמוקרטיה. כלל האזרחים הם הריבון/מקור הסמכות. האזרחים בוחרים שלטון של נציגים שייצגו אותם — לזמן קצוב המוגדר בחוק.",tzitut:"\"אנו רוצים להחזיר את ההחלטה לידי האזרחים, שהם בעלי הבית האמיתיים במדינה\"",hesber:"ראש הממשלה מציג את האזרחים כריבון = מקור הסמכות. מסיר את ההחלטה מידי הנבחרים ומחזיר אותה ישירות לעם = עקרון שלטון העם."}},
+  {title:"הצבעה במועצת תלמידים",badge:"real",passage:"חברי מועצת התלמידים התכנסו כדי להחליט על היעד לטיול השנתי. לאחר דיון, נערכה הצבעה חשאית בין 20 חברי המועצה. בסיכום הקולות התברר כי 12 נציגים הצביעו בעד טיול לדרום ו-8 בעד טיול לצפון, על כן הוחלט לצאת לטיול לדרום.",question:"ציינו והציגו את העיקרון הדמוקרטי שבא לידי ביטוי בהליך קבלת ההחלטה. צטטו. הסבירו.",hints:{ciyen:"עקרון הכרעת הרוב",hatseg:"עקרון הקובע כי מתוך כמה אפשרויות נבחרת זו שרוב המצביעים תומכים בה. אסור לרוב לקבל החלטות שפוגעות באופן לא סביר בזכויות יסוד ובמיוחד בזכויות המיעוט.",tzitut:"\"12 נציגים הצביעו בעד טיול לדרום ו-8 נציגים הצביעו בעד טיול לצפון, על כן הוחלט לצאת לטיול לדרום\"",hesber:"ההחלטה התקבלה כי 12 (הרוב) תמכו בה על פני 8 (המיעוט) = נבחרה האפשרות שרוב המצביעים תמכו בה = עקרון הכרעת הרוב."}},
+  {title:"חיפוש בטלפון ללא צו שופט",badge:"real",passage:"ממשלת ישראל החליטה לקדם תקנה חדשה המאפשרת למשטרה לבצע חיפוש בטלפונים ניידים של אזרחים ללא צו מבית משפט. בתגובה, הגישה עמותה לזכויות האזרח עתירה לבג\"ץ. בעתירה נטען כי התקנה נותנת כוח רב מדי לממשלה וכי ללא פיקוח של הרשות השופטת, השלטון עלול להשתמש בכוחו לרעה ולפגוע בזכות לפרטיות. בית המשפט הוציא צו המקפיא את יישום התקנה.",question:"ציינו והציגו את העיקרון הדמוקרטי שבא לידי ביטוי בטענת העמותה. צטטו. הסבירו.",hints:{ciyen:"עקרון הגבלת השלטון",hatseg:"השלטון מחזיק במשאבים רבים המעניקים לו כוח ועוצמה. לכן קיימת סכנה שינצל לרעה את כוחו. כדי למנוע עריצות — פיקוח באמצעות הפרדת רשויות ומנגנוני פיקוח.",tzitut:"\"ללא פיקוח של הרשות השופטת, השלטון עלול להשתמש בכוחו לרעה ולפגוע בזכות לפרטיות של האזרחים\"",hesber:"העמותה טוענת שהממשלה (=השלטון) מנצלת את כוחה ללא פיקוח. בית המשפט = מנגנון פיקוח מוסדי שנועד למנוע עריצות שלטון = עקרון הגבלת השלטון."}},
+  {title:"שליטת הממשלה על תקציב בתי המשפט",badge:"real",passage:"שר המשפטים הגיש הצעת חוק המבקשת להעניק לממשלה את הסמכות לקבוע את תקציב בתי המשפט ואת סדרי העבודה של השופטים, ללא צורך באישור הכנסת. חבר כנסת טען: \"אסור לרשות המבצעת להחזיק בשליטה כה רחבה על המערכת שאמורה לבקר אותה. אם הממשלה תשלוט בתקציב ובניהול של השופטים, היא תפגע ביכולתם לפעול באופן עצמאי\". הצעת החוק לא עברה.",question:"ציינו והציגו את העיקרון הדמוקרטי שבא לידי ביטוי בטענת חבר הכנסת. צטטו. הסבירו.",hints:{ciyen:"עקרון הפרדת רשויות",hatseg:"פיצול הכוח השלטוני לשלוש רשויות: מחוקקת, מבצעת ושופטת — למנוע ריכוז הכוח. לכל רשות סמכויות ייחודיות ומתקיימים ביניהן יחסי איזון, ריסון, פיקוח ובקרה.",tzitut:"\"אסור לרשות המבצעת להחזיק בשליטה כה רחבה על המערכת שאמורה לבקר אותה\"",hesber:"חבר הכנסת טוען שהרשות המבצעת (ממשלה) לא יכולה לשלוט ברשות השופטת — כל רשות חייבת לפעול באופן עצמאי ולאזן את האחרות = עקרון הפרדת רשויות."}},
+  {title:"הצבעה רק לתושבים משלמי ארנונה",badge:"real",passage:"לקראת הבחירות בעיר מסוימת, הציעה סיעה לקבוע שרק תושבים ותיקים המשלמים ארנונה יוכלו להצביע. יוזמי ההצעה טענו כי רק מי שתורם לקופת העיר זכאי להשפיע. קבוצת משפטנים התנגדה וטענה: \"הזכות להצביע אינה פרס על מצב כלכלי; היא חייבת להינתן לכלל התושבים באופן גורף, ללא סינון של קבוצות אוכלוסייה\".",question:"ציינו והציגו את התנאי לקיום בחירות דמוקרטיות שבא לידי ביטוי בטענת המשפטנים. צטטו. הסבירו.",hints:{ciyen:"כלליות",hatseg:"כל אזרחי המדינה זכאים לבחור ולהיבחר למוסדות הנבחרים במדינה במגבלות הכתובות בחוק.",tzitut:"\"הזכות להצביע בבחירות אינה פרס על מצב כלכלי; היא חייבת להינתן לכלל התושבים באופן גורף, ללא סינון של קבוצות אוכלוסייה\"",hesber:"המשפטנים טוענים שכל תושב — ללא קשר למצב כלכלי — זכאי לבחור = הזכות שייכת לכולם = תנאי הכלליות."}},
+  {title:"קלפיות פתוחות ופתקים גלויים",badge:"real",passage:"במהלך הבחירות למועצה מקומית, הוחלט להציב קלפיות על שולחנות פתוחים. הנחיות ועדת הבחירות קבעו כי על כל תושב להניח את פתק ההצבעה בתיבה כשהוא גלוי, כדי שמשקיפים יוכלו לוודא שהפתק תקין. המצביעים הביעו התנגדות וחלקם בחרו שלא להצביע.",question:"ציינו והציגו את התנאי לקיום בחירות דמוקרטיות שנפגע בהנחיית ועדת הבחירות. צטטו. הסבירו.",hints:{ciyen:"חשאיות",hatseg:"איש מלבד הבוחר לא יודע במי בחר. מובטח שהבוחר לא יושפע מלחצים של גורמים שונים.",tzitut:"\"על כל תושב להניח את פתק ההצבעה בתיבה כשהוא גלוי, כדי שמשקיפי הוועדה יוכלו לוודא שהפתק תקין\"",hesber:"כשהפתק גלוי — כל אחד יכול לראות למי הצביע הבוחר. זה מאפשר לחץ על הבוחרים ופוגע בחשאיות = תנאי החשאיות נפגע."}},
+  {title:"מפלגות חדשות לא יורשו להתמודד",badge:"real",passage:"לקראת הבחירות לפרלמנט, הוציאה הממשלה תקנה חדשה: מפלגות המבקשות להציג מצע השונה באופן מהותי ממדיניות הממשלה לא יורשו להגיש רשימות מועמדים ולא יופיעו על פתקי ההצבעה.",question:"ציינו והציגו את התנאי לקיום בחירות דמוקרטיות שנפגע על פי התקנה. צטטו. הסבירו.",hints:{ciyen:"התמודדות חופשית הוגנת",hatseg:"הבחירות מאפשרות תחרות הוגנת המבוססת על חירויות וזכויות פוליטיות — במיוחד חופש הביטוי וחופש ההתאגדות.",tzitut:"\"מפלגות המבקשות להציג מצע פוליטי השונה ממדיניות הממשלה לא יורשו להגיש את רשימות המועמדים שלהן\"",hesber:"התקנה מונעת מכלל המפלגות להתמודד — רק מפלגות שמסכימות עם הממשלה יכולות לגשת לבחירות. אין תחרות הוגנת = תנאי ההתמודדות החופשית נפגע."}},
+  {title:"דוח מבקר על מחדלי הצפות",badge:"real",passage:"בעקבות הצפות קשות, החליט מבקר המדינה לבחון את תפקוד הרשויות המקומיות. לאחר חקירה מעמיקה, פורסם דוח רשמי המפרט מחדלים בתחזוקת מערכות הניקוז. הדוח הוגש ופורסם באמצעי התקשורת, כלל המלצות לתיקון הליקויים ודרישה מהממשלה להקצות תקציבים. הממשלה הודיעה כי תפעל בהתאם למסקנות.",question:"ציינו והציגו את מנגנון הפיקוח והביקורת שבא לידי ביטוי בהגשת ופרסום הדוח. צטטו. הסבירו.",hints:{ciyen:"מנגנון פיקוח וביקורת מוסדי (פורמלי)",hatseg:"ביקורת שמקיימים גופים ומוסדות שלטוניים: מבקר המדינה, הכנסת, נציב תלונות, בית משפט. שהוסמכו לכך בחוק. באמצעות פרסום דוחות/הנחיות/מסמכים רשמיים.",tzitut:"\"פורסם דוח רשמי המפרט שורה של מחדלים בתחזוקת מערכות הניקוז\"",hesber:"מבקר המדינה = גוף שלטוני שהוסמך בחוק לבקר. פרסום דוח רשמי = הכלי הפורמלי שלו. פיקח על הרשויות המקומיות = מנגנון מוסדי/פורמלי."}},
+  {title:"מחאת הורים על קיצוץ בצהרונים",badge:"real",passage:"בעקבות החלטת הממשלה לקצץ בתקציב הצהרונים, פתחו הורים רבים במחאה. הם הפיצו ברשתות החברתיות סרטונים המבקרים את המדיניות. אחת האימהות טענה: \"המטרה שלנו היא ליצור לחץ ציבורי כבד שיגרום לשלטון להבין שהעם לא מסכים להחלטה הזו, אנחנו נמשיך להשמיע את קולנו בתקשורת עד שהקיצוץ יבוטל.\" בעקבות הלחץ הציבורי ההחלטה בוטלה.",question:"ציינו והציגו את מנגנון הפיקוח והביקורת שבא לידי ביטוי בטענת האם. צטטו. הסבירו.",hints:{ciyen:"מנגנון פיקוח וביקורת לא מוסדי (בלתי פורמלי)",hatseg:"ביקורת שמקיימים גופים, ארגונים או פרטים: הפגנות, מחאות, רשתות חברתיות — ללא הסמכה חוקית, מיוזמת אזרחים, לשם לחץ והבעת ביקורת פוליטית.",tzitut:"\"המטרה שלנו היא ליצור לחץ ציבורי כבד שיגרום לשלטון להבין שהעם לא מסכים\"",hesber:"ההורים = אזרחים פרטיים ללא הסמכה חוקית, שפעלו ברשתות החברתיות ובתקשורת = כלי בלתי פורמלי. מטרתם: לחץ על הממשלה = מנגנון פיקוח בלתי מוסדי."}},
+  {title:"שר שמציע לצמצם מיסים וקצבאות",badge:"real",passage:"בדיון על תקציב המדינה, הציע אחד השרים לקצץ במיסים המוטלים על המגזר העסקי ובמקביל לצמצם קצבאות רווחה. השר אמר בראיון לתקשורת: \"המדינה צריכה להסיר חסמים ולהניח לכוחות השוק לפעול בחופשיות, שכן שגשוג כלכלי מושג כאשר האדם לוקח אחריות מלאה על גורלו ותורם לצמיחה הכלכלית במשק\".",question:"ציינו והציגו את הגישה הכלכלית-חברתית שבאה לידי ביטוי בדברי השר. צטטו. הסבירו.",hints:{ciyen:"הגישה הליברלית",hatseg:"מדגישה את החירות הכלכלית על פני השוויון. דגש על יוזמה פרטית ושוק חופשי. מעורבות המדינה מינימלית. תמיכה בצמצום מיסוי. דוגמאות: הפרטה, קיצוץ תקציבים, צמצום קצבאות.",tzitut:"\"המדינה צריכה להסיר חסמים ולהניח לכוחות השוק לפעול בחופשיות\"",hesber:"השר דוגל בשוק חופשי ללא התערבות המדינה + צמצום קצבאות = מינימום מעורבות מדינה + חירות כלכלית = הגישה הליברלית."}},
+  {title:"ממשלה מעלה מס חברות ומגדילה בריאות",badge:"real",passage:"ממשלת ישראל אישרה תוכנית כלכלית חדשה הכוללת העלאה של מס החברות והגדלה משמעותית של תקציב שירותי הבריאות והחינוך הציבוריים. מטרת התוכנית היא להקל על משפחות בעלות הכנסה נמוכה ובכך לסייע לחברה כולה.",question:"ציינו והציגו את הגישה הכלכלית-חברתית שבאה לידי ביטוי בתוכנית הכלכלית. צטטו. הסבירו.",hints:{ciyen:"הגישה הסוציאל-דמוקרטית",hatseg:"מדגישה את השוויון החברתי-כלכלי על פני החירות הכלכלית. מעורבות המדינה רחבה. רשת ביטחון סוציאלי. תמיכה במיסוי גבוה. דוגמאות: סבסוד שירותים, שירותים חברתיים, חקיקה חברתית.",tzitut:"\"העלאה של מס החברות והגדלה משמעותית של תקציב שירותי הבריאות והחינוך הציבוריים\"",hesber:"העלאת מס = מיסוי גבוה; הגדלת שירותי בריאות וחינוך = סיוע לחלשים ורשת ביטחון סוציאלי = הגישה הסוציאל-דמוקרטית."}},
+  {title:"מסדרון השלום — פנייה למדינות שכנות",badge:"real",passage:"ממשלת ישראל פועלת לקידום מיזם כלכלי בשם מסדרון השלום — רשת רכבות וצינורות אנרגיה מנמלי הים התיכון למפרץ הפרסי. בטקס ההשקה הצהיר נציג הממשלה: \"ישראל קוראת לכל מדינות האזור להניח מאחור את סכסוכי העבר ולקחת חלק במיזם כדי להעלות את רמת החיים במזרח התיכון\".",question:"ציינו והציגו את הפנייה לאחד הגורמים בהכרזת העצמאות שבאה לידי ביטוי בהצהרת נציג הממשלה. צטטו. הסבירו.",hints:{ciyen:"פנייה למדינות השכנות",hatseg:"בהכרזת העצמאות ישראל מושיטה יד לשלום ושכנות טובה למדינות השכנות, לשיתוף פעולה במאמץ לקדם את המזרח התיכון כולו.",tzitut:"\"ישראל קוראת לכל מדינות האזור להניח מאחור את סכסוכי העבר ולקחת חלק במיזם כדי להעלות את רמת החיים במזרח התיכון\"",hesber:"ישראל פונה למדינות האזור לשיתוף פעולה לקידום האזור — בדיוק כפי שהוצהר בהכרזת העצמאות = פנייה למדינות השכנות."}},
+  {title:"קריאה לקהילות יהודיות בגולה לסייע",badge:"real",passage:"הממשלה השיקה מיזם לשיקום תשתיות ביישובי הדרום והצפון, המשלב מתנדבים ותרומות מקהילות יהודיות ברחבי העולם. הממשלה הדגישה כי המדינה רואה ביהודים המתגוררים מחוץ לגבולותיה שותפים מלאים לשיקום הארץ, וכי עליהם לעמוד לימינה בעת הזו כדי להבטיח את חוסנו של העם.",question:"ציינו והציגו את הפנייה לאחד הגורמים בהכרזת העצמאות שבאה לידי ביטוי בדברי הממשלה. צטטו. הסבירו.",hints:{ciyen:"פנייה לעם היהודי בתפוצות",hatseg:"בהכרזת העצמאות ישראל קוראת לעם היהודי בתפוצות להתלכד סביב הישוב היהודי ולסייע במערכה הגדולה לגאולת ישראל.",tzitut:"\"המדינה רואה ביהודים המתגוררים מחוץ לגבולותיה שותפים מלאים לשיקום הארץ, וכי עליהם לעמוד לימינה\"",hesber:"הממשלה פונה ליהודי חוץ לארץ לתמוך ולסייע — בדיוק כפי שמופיע בהכרזת העצמאות בפנייה לעם היהודי בתפוצות."}},
+  {title:"דרישת מפלגות דתיות לשנות חוק השבות",badge:"real",passage:"משרד הפנים פרסם נתונים על מספר האנשים שקיבלו אזרחות ישראלית בשנה החולפת. נציגי מפלגות דתיות דרשו כי הקריטריון המאפשר לכל אדם ממוצא יהודי לקבל אזרחות אוטומטית יותנה בכך שזהותו תוכר רק על ידי פסיקת ההלכה והרבנות.",question:"ציינו והציגו את החוק עליו מתבססת דרישת נציגי המפלגות. צטטו. הסבירו.",hints:{ciyen:"חוק השבות",hatseg:"כל יהודי זכאי לעלות לארץ. מאפשר גם לבני זוג, ילדים ונכדים של יהודים לעלות. מטרה: לעודד עלייה ולחזק את הרוב היהודי ואופיה היהודי של המדינה.",tzitut:"\"הקריטריון המאפשר לכל אדם ממוצא יהודי להפוך לאזרח המדינה באופן אוטומטי\"",hesber:"הדרישה מתייחסת ישירות לחוק השבות הקובע זכות עלייה לכל יהודי. המפלגות רוצות לצמצם את ההגדרה לפי ההלכה = הגבלת חוק השבות."}},
+  {title:"פקחים שמכסים לחמניות בפסח",badge:"real",passage:"בשבוע האחרון של חודש ניסן נכנסו פקחים למאפיות ולמרכולים הממוקמים בשטחים ציבוריים פתוחים. הם דרשו מהמוכרים לכסות ביריעות אטומות את דוכני הלחם. הפקחים הסבירו כי חובתם לוודא שהציבור לא ייתקל במוצרים שתפחו ברחוב, שכן המדינה בחרה לתת ביטוי רשמי למנהג ההלכתי של הימנעות מהצגת מזון שאינו כשר לימי החג.",question:"ציינו והציגו את החוק עליו התבססו הפקחים. צטטו. הסבירו.",hints:{ciyen:"חוק חג המצות",hatseg:"החוק אוסר על בעלי עסקים להציג ולמכור חמץ במרחב הציבורי באזורים יהודים בפסח. מטרה: לסייע לשמור על הציווי ההלכתי האוסר חמץ בפסח. מאפיין יהודי כי מבטא מצוות אי אכילת חמץ.",tzitut:"\"המדינה בחרה לתת ביטוי רשמי למנהג ההלכתי של הימנעות מהצגת מזון שאינו כשר לימי החג\"",hesber:"הפקחים אוכפים את חוק חג המצות האוסר הצגת חמץ במרחב הציבורי בפסח = ביטוי למצווה הלכתית = מאפיין יהודי של המדינה."}},
+  {title:"שרת תחבורה נגד עבודה בשבת",badge:"real",passage:"שרת התחבורה הכריזה על תוכנית להפעיל תחבורה ציבורית בשבת בכל רחבי הארץ. בתגובה הופיעה חברת כנסת שהביעה את סתייגותה מהתוכנית: היא טענה שאומנם היא מבינה את הצורך בכך, אבל יישום התוכנית עלול לאלץ נהגים יהודים לעבוד בימי שבת וחג שלא בחוק ובניגוד לרצונם. בעקבות הדברים הושהתה התוכנית.",question:"ציינו והציגו את החוק שמייחסת חברת הכנסת לשערה. צטטו מן הקטע משפט שחוק זה בא לידי ביטוי. הסבירו כיצד חוק זה בא לידי ביטוי במשפט שציטטתם.",hints:{ciyen:"חוק שעות עבודה ומנוחה",hatseg:"החוק מגדיר את שעות העבודה וימי העבודה ומנוחה במשק. ליהודים נקבע שבת כיום השבתון השבועי. מטרה: לאפשר שמירת שבת לפי ההלכה. מאפיין יהודי כי מבטא מצוות שמירת השבת.",tzitut:"\"יישום התוכנית עלול לאלץ נהגים יהודים לעבוד בימי שבת וחג שלא בחוק ובניגוד לרצונם\"",hesber:"חברת הכנסת טוענת שהתוכנית תפגע בחוק שעות עבודה ומנוחה הקובע שיהודים לא חייבים לעבוד בשבת. חוק זה מבטא את מצוות שמירת השבת = מאפיין יהודי."}},
+  {title:"הוועדה למינוי שופטים ערבים",badge:"real",passage:"הוועדה למינוי שופטים מינתה בשנה האחרונה כמה שופטים לבית המשפט העליון ולבית המשפט המחוזי. הוועדה מינתה שופט ערבי לבית המשפט העליון ועוד בכמה שופטים ערביים למשפט המחוזיים. כמו כן לראשונה מינתה הוועדה שופטת ערבייה לבית המשפט המחוזי בנצרת. בעקבות זאת נכתב בעיתונאית כי מינויים אלה של הוועדה כי הם לאומי וחינוכי, וכי הדבר המתבקש במדינה שבה לערבים יש חלק מרכזי בחברה.",question:"ציינו והציגו איזו פנייה מן הפניות לגורמים השונים בהכרזת העצמאות באה לידי ביטוי בדברי העיתונאית. צטטו. הסבירו.",hints:{ciyen:"פנייה לערבים תושבי מדינת ישראל",hatseg:"בהכרזת העצמאות ישראל קוראת לערבים תושבי המדינה לשמור על השלום, לקחת חלק בהקמת המדינה, על יסוד אזרחות מלאה ושווה וייצוג מתאים בכל מוסדותיה.",tzitut:"\"הדבר המתבקש במדינה שבה לערבים יש חלק מרכזי בחברה\"",hesber:"העיתונאית מביעה תמיכה בייצוג ערבי במוסדות המדינה (בית משפט) = בדיוק מה שהובטח בהכרזת העצמאות בפנייה לערבים: ייצוג מתאים בכל מוסדות המדינה."}},
+  {title:"ראש עיר שדוחה בחירות בגלל לחץ עסקי",badge:"real",passage:"במדינה מסוימת נהוג לקיים בחירות לפרלמנט (כנסת) אחת ל-4 שנים באופן סדיר. בבחירות האחרונות נבחר ראש ממשלה חדש שהבטיח לבצע שינויים כלכליים וביטחוניים עמוקים. זמן קצר לאחר כניסתו לתפקיד, טען ראש הממשלה כי כדי לקבל שקט תעשייתי ממושך ללא הפרעות של קמפיין בחירות, לכן הודיע ראש הממשלה כי הציבור יוכל לבחור שוב את נציגיו רק בעוד עשרים שנה. בתגובה פרצו הפגנות ענק ברחבי המדינה ואזרחים רבים עתרו לבג\"ץ בעקבות ההודעה.",question:"ציינו והציגו את התנאי לקיום בחירות דמוקרטיות שנפגע בעקבות הודעת ראש הממשלה. צטטו מן הקטע משפטת שממנו שתנאי זה בא לידי ביטוי. הסבירו.",hints:{ciyen:"מחזוריות",hatseg:"הבחירות חוזרות במרווחי זמן ידועים וסדירים הקבועים בחוק.",tzitut:"\"הציבור יוכל לבחור שוב את נציגיו רק בעוד עשרים שנה\"",hesber:"ראש הממשלה דוחה את הבחירות ל-20 שנה — זה מנוגד לתנאי המחזוריות הדורש שבחירות יתקיימו במרווחי זמן ידועים וסדירים הקבועים בחוק."}},
+  {title:"שרת אוצר שמציעה להוריד מס ולצמצם שירותים",badge:"real",passage:"במסגרת הדיונים על תקציב המדינה, הציעה שרת הרווחה להעלות את שיעור המס כי שימוש בכספי המיסים נועד כדי לממן מעטפת רחבה של שירותי הרפואה והחינוך לנזקקים לקבל אותם ביום יום שביום לא מצליחים לקבל אותם. בתגובה, הסבירה הסבירה השרה בנביגוד לשבתות החזקות לכבל מעטפת רחבה של שירותים חברתיים, על כן חברי הוועדה עברו לבחון את הנתונים הסטטיסטיים בנוגע ליישום היועץ המועצה.",question:"ציינו והציגו את הגישה הכלכלית-חברתית שבאה לידי ביטוי בדברי השרה. צטטו מן הקטע המשפט הלמלד על גישה זה. הסבירו כיצד גישה זו בא לידי ביטוי במשפט שציטטתם.",hints:{ciyen:"הגישה הסוציאל-דמוקרטית",hatseg:"מדגישה את השוויון החברתי-כלכלי על פני החירות הכלכלית. מעורבות המדינה רחבה. רשת ביטחון סוציאלי. תמיכה במיסוי גבוה. דוגמאות: סבסוד שירותים, שירותים חברתיים, חקיקה חברתית.",tzitut:"\"להעלות את שיעור המס כי שימוש בכספי המיסים נועד כדי לממן מעטפת רחבה של שירותי הרפואה והחינוך לנזקקים\"",hesber:"השרה תומכת בהעלאת מיסוי + מתן שירותים חברתיים לנזקקים = מדינה מעורבת + רשת ביטחון סוציאלי = הגישה הסוציאל-דמוקרטית."}},
+  {title:"מועצת עיריית דקלים מצביעה על מרכז קהילתי",badge:"real",passage:"מועצת עיריית \"דקלים\" התכנסה כדי לדון ביוזמה להקמת מרכז קהילתי חדש בשכונה ותיקה בעיר. במהלך הישיבה התגלעה מחלוקת בין חברי המועצה לגבי מיקומו של המרכז. לאחר דיון ממושך שבו הוצגו עמדות שונות, נערכה הצבעה בקרב כל חברי המועצה. בסיכומה של ההצבעה, רוב חברי המועצה כ-15 הביעו תמיכה, מול 8 אשר התנגדו למיקום שהציע ראש העירייה, על כן ראש העירייה הודיע כי העירייה תחל בתכנון המבנה באופן מיידי.",question:"ציינו והציגו את העיקרון הדמוקרטי שבא לידי ביטוי בהליך בו נעזרה העירייה לצורך קביעת מיקום המרכז הקהילתי. צטטו. הסבירו.",hints:{ciyen:"עקרון הכרעת הרוב",hatseg:"עקרון הקובע כי מתוך כמה אפשרויות נבחרת זו שרוב המצביעים תומכים בה. אסור לרוב לקבל החלטות שפוגעות באופן לא סביר בזכויות יסוד ובמיוחד בזכויות המיעוט.",tzitut:"\"רוב חברי המועצה כ-15 הביעו תמיכה, מול 8 אשר התנגדו למיקום שהציע ראש העירייה\"",hesber:"ההחלטה התקבלה כי 15 (הרוב) תמכו בה לעומת 8 (המיעוט) = נבחרה האפשרות שרוב המצביעים תמכו בה = עקרון הכרעת הרוב."}},
+  {title:"שאלה 6 — כנס להגברת שיתוף ערבים",badge:"real",passage:"בתקופה האחרונה חלה עלייה מהמתיחות הביטחונית, דבר שהוביל לחששות מפני קרב בין קבוצות שונות בחברה. בתגובה לכך, התקיים כנס מיוחד בהשתתפות אנשי ציבור, שבו פנו המשתתפים לתושבים הערביים בישראל ולשמור על הסדר הציבורי ולהמשיך ולשמר על הסדר הציבורי הערבי לנוכח הביטחוני. אחד הפעילים הסביר כי יש להבטיח שהצבור הערבי יהיה שותף פעיל בתהלוכה ויוכל להשתלב בכל משרדי הממשלה והרשויות ולהשפיע עליהם. מטרת הממפש הייתה לחזק את תחושת השייכות ולמנוע את ההתדרדרות של המצב הביטחוני בתוך המדינה.",question:"ציינו והציגו איזו פנייה מתוך הפניות לגורמים השונים בהכרזת העצמאות באה לידי ביטוי בסבר של אחד הפעילים. צטטו מן הקטע משפט שממנו למדים שפנייה זו באה לידי ביטוי בקטע. הסבירו.",hints:{ciyen:"פנייה לערבים תושבי מדינת ישראל",hatseg:"בהכרזת העצמאות ישראל קוראת לערבים תושבי המדינה לשמור על השלום, לקחת חלק בהקמת המדינה, על יסוד אזרחות מלאה ושווה וייצוג מתאים בכל מוסדותיה.",tzitut:"\"יש להבטיח שהצבור הערבי יהיה שותף פעיל בתהלוכה ויוכל להשתלב בכל משרדי הממשלה והרשויות ולהשפיע עליהם\"",hesber:"הפעיל קורא לשיתוף הערבים בכל מוסדות הממשלה = בדיוק הפנייה בהכרזת העצמאות לערבים לקחת חלק בהקמת המדינה ולקבל ייצוג מתאים בכל מוסדותיה."}},
+  {title:"שאלה 7 — זמר שסרב להופיע בשבת (פסטיגל)",badge:"real",passage:"אחד הזמרים האהובים בישראל, עומר אדם, חתם עם הפקת הפסטיגל כי הוא אינו מוכן להופיע בשבת. בעקבות כך דווח כי לראשונה המופע הקבוע של ימי החנוכה לא יחלל שבת. כתוצאה מהדרישה, הזמר שידוע כשומר שבת הצליח לשנות את חוקי הפורמט — ומופעי הפסטיגל בחנוכה הקרוב לא יתקיימו ביום המנוחה של העם היהודי.",question:"ציינו והציגו את החוק שבא לידי ביטוי בסירוב הזמר מדרישת ההפקה. צטטו מן הקטע משפט שחוק זה בא לידי ביטוי. הסבירו כיצד חוק זה בא לידי ביטוי במשפט שציטטתם.",hints:{ciyen:"חוק שעות עבודה ומנוחה",hatseg:"החוק מגדיר את שעות העבודה וימי העבודה ומנוחה במשק. ליהודים נקבע שבת כיום השבתון השבועי. מטרה: לאפשר שמירת שבת לפי ההלכה. מאפיין יהודי כי מבטא את מצוות שמירת השבת.",tzitut:"\"הזמר שידוע כשומר שבת הצליח לשנות את חוקי הפורמט — ומופעי הפסטיגל בחנוכה הקרוב לא יתקיימו ביום המנוחה של העם היהודי\"",hesber:"הזמר מסרב לעבוד בשבת = מימוש חוק שעות עבודה ומנוחה הקובע שבת כיום שבתון ליהודים = ביטוי לאופי היהודי של המדינה."}},
+  {title:"שאלה 8 — יוקר המחיה ורפורמה בחלב",badge:"real",passage:"יוקר המחיה בישראל הוא מגיפה שקטה שגובה מחיר כלכלי כבד מהאזרחים, אך בראש ובראשונה מבעלי ההכנסות הנמוכות בחברה הישראלית. לכן, שר האוצר סמוטריץ' מנסה לקדם רפורמה (תוכנית לשינוי) במשק החלב. הרפורמה נועדה לאפשר ייבוא מוצרי חלב ממדינות נוספות ובכך להוריד מחירים, וכניסת גורמים נוספים לשוק. לפי דברי השר, הרפורמה נועדה לאפשר לצרכן להוזיל מחירים לנזקקים ובכך להפחתת הפיקוח מצד הממשלה.",question:"ציינו והציגו את הגישה הכלכלית-חברתית שבאה לידי ביטוי ברפורמה החלב לפי דברי השר. צטטו מן הקטע משפט שגישה זו בא לידי ביטוי. הסבירו.",hints:{ciyen:"הגישה הליברלית",hatseg:"מדגישה חירות כלכלית על פני שוויון. דגש על שוק חופשי ויוזמה פרטית. מעורבות המדינה מינימלית. תמיכה בצמצום מיסוי. דוגמאות: הפרטה, קיצוץ תקציבים, צמצום קצבאות.",tzitut:"\"הרפורמה נועדה לאפשר ייבוא מוצרי חלב ממדינות נוספות ובכך להוריד מחירים, וכניסת גורמים נוספים לשוק\"",hesber:"השר מקדם פתיחת השוק לתחרות מחו\"ל + צמצום פיקוח ממשלתי = שוק חופשי + מעורבות מינימלית = הגישה הליברלית."}},
+  {title:"שאלה 9 — מועצת תלמידים וטיול שנתי",badge:"real",passage:"חברי מועצת התלמידים בבית ספר גדול התכנסו כדי להחליט על היעד לטיול השנתי. על הפרק עמדו שתי אפשרויות: טיול לצפון הארץ או טיול לדרום. לאחר דיון ארוך, נערכה הצבעה חשאית בין 20 חברי המועצה. בסיכום הקולות התברר כי 12 נציגים הצביעו בעד טיול לצפון, ו-8 נציגים הצביעו בעד טיול לדרום, על כן הוחלט בסוף ההצבעה לצאת לטיול לצפון.",question:"ציינו והציגו את העיקרון הדמוקרטי שבא לידי ביטוי בהליך קבלת ההחלטה של מועצת התלמידים. צטטו מן הקטע משפט שממנו שעיקרון זה בא לידי ביטוי. הסבירו.",hints:{ciyen:"עקרון הכרעת הרוב",hatseg:"עקרון הקובע כי מתוך כמה אפשרויות נבחרת זו שרוב המצביעים תומכים בה. אסור לרוב לקבל החלטות שפוגעות באופן לא סביר בזכויות יסוד ובמיוחד בזכויות המיעוט.",tzitut:"\"12 נציגים הצביעו בעד טיול לצפון, ו-8 נציגים הצביעו בעד טיול לדרום, על כן הוחלט בסוף ההצבעה לצאת לטיול לצפון\"",hesber:"ההחלטה התקבלה כי 12 (הרוב) תמכו בה לעומת 8 (המיעוט) = נבחרה האפשרות שרוב המצביעים תמכו בה = עקרון הכרעת הרוב."}},
+  {title:"שאלה 10 — בחירות לפרלמנט ודחיית מועד",badge:"real",passage:"במדינה מסוימת נהוג לקיים בחירות לפרלמנט (כנסת) אחת ל-4 שנים באופן סדיר. בבחירות האחרונות נבחר ראש ממשלה חדש שהבטיח לבצע שינויים בכלכליים וביטחוניים עמוקים. זמן קצר לאחר כניסתו לתפקיד, טען ראש הממשלה כי כדי לקבל שקט תעשייתי ממושך ללא הפרעות של קמפיין בחירות, הם לא ישיגו לאומי וחינוכי. לכן הודיע ראש הממשלה כי הציבור יוכל לבחור שוב את נציגיו רק בעוד עשרים שנה. בתגובה פרצו הפגנות ענק ברחבי המדינה ואזרחים רבים עתרו לבג\"ץ בעקבות ההודעה.",question:"ציינו והציגו את התנאי לקיום בחירות דמוקרטיות שנפגע בעקבות הודעת ראש הממשלה. צטטו מן הקטע משפט שממנו שתנאי זה בא לידי ביטוי. הסבירו.",hints:{ciyen:"מחזוריות",hatseg:"הבחירות חוזרות במרווחי זמן ידועים וסדירים הקבועים בחוק.",tzitut:"\"הציבור יוכל לבחור שוב את נציגיו רק בעוד עשרים שנה\"",hesber:"ראש הממשלה דוחה בחירות ל-20 שנה = פגיעה בתנאי המחזוריות הדורש בחירות במרווחי זמן ידועים וסדירים הקבועים בחוק."}},
+  {title:"שאלה 11 — מחאת סטודנטים על מחירי מזון",badge:"real",passage:"לאחר שאחת מחברות המזון הגדולות בישראל הודיעה על העלאה חדה במחירי מוצרי היסוד, החל גל מחאה רחב בקרב הציבור. קבוצת סטודנטים פתחה דף פייסבוק שקרא לחרם צרכנים. הם הפיצו תמונות של מדפים ריקים ואף התראיינו לתוכניות האקטואליה וכך לא נסתיר ואף התובנות לדרשו הורדת מחירים. בתגובה לסערה הציבורית נאלצה הנהלת החברה לקיים סיקור נרחב ולסגור את הנושא בתקשורת, ולסיקור נרחב וחברי כנסת קיימו דיון דחוף בנושא כדי לבחון דרכים להגברת התחרות בשוק.",question:"ציינו והציגו את סוג מנגנון הפיקוח והביקורת שבא לידי ביטוי בפעולת הסטודנטים. צטטו מן הקטע משפט שממנו למדים שמנגנון פיקוח וביקורת זה בא לידי ביטוי. הסבירו כיצד מנגנון פיקוח וביקורת זה בא לידי ביטוי בקטע.",hints:{ciyen:"מנגנון פיקוח וביקורת לא מוסדי (בלתי פורמלי)",hatseg:"ביקורת שמקיימים גופים, ארגונים או פרטים: הפגנות, מחאות, עצומות, רשתות חברתיות — ללא הסמכה חוקית, מיוזמת אזרחים, לשם לחץ והבעת ביקורת פוליטית על קובעי מדיניות.",tzitut:"\"קבוצת סטודנטים פתחה דף פייסבוק שקרא לחרם צרכנים. הם הפיצו תמונות של מדפים ריקים ואף התראיינו לתוכניות האקטואליה\"",hesber:"הסטודנטים = אזרחים פרטיים ללא הסמכה חוקית, שפעלו ברשתות חברתיות ובתקשורת = כלי בלתי פורמלי, לשם לחץ ציבורי = מנגנון בלתי מוסדי."}}
+];
+
+let currentFlashTopic=null,flashCards=[],flashIdx=0,flashKnew=0,flashDidnt=0;
+
+function showSection(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('visible'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('visible');
+  if(btn)btn.classList.add('active');
+}
+function showTopic(key){
+  const t=TOPICS[key];
+  const el=document.getElementById('topic-content');
+  let html=`<button class="back-btn" onclick="backToTopics()">← חזרה לנושאים</button><h2 style="font-size:16px;font-weight:500;margin-bottom:12px;">${t.title}</h2>`;
+  t.concepts.forEach(c=>{
+    const defHtml=c.definition.replace(/\n/g,'<br>');
+    const isHeader=c.name.startsWith('⭐');
+    html+=`<div class="card${isHeader?' header-card':''}"><h3>${c.name}</h3><div class="definition">${defHtml}</div><div class="keywords">${c.keywords.map(k=>`<span class="kw">${k}</span>`).join('')}</div></div>`;
+  });
+  el.innerHTML=html;
+  document.getElementById('topic-list').style.display='none';
+  el.style.display='block';
+}
+function backToTopics(){document.getElementById('topic-list').style.display='block';document.getElementById('topic-content').style.display='none';}
+
+function toggleE2Answer(id){
+  const el=document.getElementById(id);
+  el.style.display=el.style.display==='block'?'none':'block';
+}
+function showExam2EventQ(idx){
+  const q=EVENT_QUESTIONS[idx];
+  if(!q)return;
+  const qid=storeQ(q);
+  const list=document.getElementById('exam2-event-list');
+  const content=document.getElementById('exam2-event-content');
+  const hasKey=!!getApiKey();
+  content.innerHTML=`<button class="back-btn" onclick="backToExam2EventList()">← חזרה לשאלות</button>
+  <div class="event-q">
+    <span class="q-badge real">📝 מבחן 2</span>
+    <div class="passage">${q.passage}</div>
+    <div class="q-label-ev">${q.question}</div>
+    <div style="margin-top:12px;">
+      <div class="answer-step active"><label><span class="step-pill pill-c">ציין</span> שם המושג בלבד:</label><input type="text" id="ans-ciyen" placeholder="שם המושג..."></div>
+      <div class="answer-step"><label><span class="step-pill pill-h">הצג</span> ההגדרה המלאה:</label><textarea id="ans-hatseg" rows="3" placeholder="ההגדרה המלאה מהחומר..."></textarea></div>
+      <div class="answer-step"><label><span class="step-pill pill-t">ציטוט</span> העתק משפט מהקטע:</label><textarea id="ans-tzitut" rows="2" placeholder="ציטוט מהקטע..."></textarea></div>
+      <div class="answer-step"><label><span class="step-pill pill-e">הסבר</span> קשר בין הציטוט להגדרה (לא לחזור על הציטוט):</label><textarea id="ans-hesber" rows="4" placeholder="ההסבר במילים שלך..."></textarea></div>
+    </div>
+    <button class="check-btn" id="check-btn" onclick="checkWithAI('${qid}')">${hasKey?'בדוק תשובה עם AI ↗':'בדוק תשובה (AI לא מוגדר)'}</button>
+    <div class="feedback-box" id="feedback"></div>
+    <div class="hint-area">
+      <button class="hint-toggle" onclick="toggleHints()" id="hint-btn" style="width:100%;text-align:center;padding:6px;">💡 הצג רמזים ותשובה לדוגמה ▼</button>
+      <div id="full-hints">
+        <div style="margin-top:10px;padding-top:8px;border-top:0.5px solid var(--border);">
+          <strong>ציין:</strong> ${q.hints.ciyen}<br>
+          <strong>הצג:</strong> ${q.hints.hatseg}<br>
+          <strong>ציטוט:</strong> ${q.hints.tzitut}<br>
+          <strong>הסבר:</strong> ${q.hints.hesber}
+        </div>
+      </div>
+    </div>
+  </div>`;
+  list.style.display='none';
+  content.style.display='block';
+}
+function backToExam2EventList(){
+  document.getElementById('exam2-event-list').style.display='block';
+  document.getElementById('exam2-event-content').style.display='none';
+}
+async function checkE2WithAI(qid){
+  const QUESTIONS_META={
+    e2q1:{q:'ציינו והציגו שתי הצדקות להקמת מדינת ישראל מהכרזת העצמאות',correct:'שלוש סוגי הצדקות: א) טבעית-אוניברסלית — זכות טבעית של כל עם להגדרה עצמית. ב) משפטית-בינלאומית — הצהרת בלפור, כתב המנדט, החלטה 181. ג) היסטורית — 5 טיעונים: קימות העם בארץ, הגלות, שיבה בדורות האחרונים, השואה, מלחמת העולם השנייה.'},
+    e2q2:{q:'הציגו את החלטה 181 של האו"ם — תוכנית החלוקה',correct:'החלטת עצרת האו"ם ב-29.11.1947. להקים מדינה יהודית ומדינה ערבית. ירושלים — שליטה בינלאומית. שתי המדינות דמוקרטיות. היהודים קיבלו, הערבים דחו ופרצה מלחמת העצמאות.'},
+    e2q3:{q:'הציגו מאפיין יהודי אחד ומאפיין דמוקרטי אחד מהכרזת העצמאות',correct:'יהודי: שם המדינה / פתיחת שערים לכל יהודי / קריאה לעם היהודי / מורשת נביאי ישראל. דמוקרטי: מקומות קדושים לכל / מוסדות דמוקרטיים ובחירות / שוויון זכויות / קריאה לערבים.'},
+    e2q4:{q:'ציינו שני הבדלים בין הגישה הליברלית לסוציאל-דמוקרטית',correct:'הבדל 1: ליברלית — חירות כלכלית; סוציאל-דמוקרטית — שוויון. הבדל 2: ליברלית — מעורבות מדינה מינימלית; סוציאל-דמוקרטית — מעורבות רחבה ורשת ביטחון סוציאלי.'},
+    e2q5:{q:'הציגו את המושג מעצר מנהלי',correct:'מעצר מניעתי מידי ללא הליך פלילי רגיל, גם ללא אישום. מטרה: ביטחון המדינה/ציבור. בסמכות שר הביטחון בלבד. תקף 6 חודשים, ניתן להארכה. כפוף לביקורת בשל פגיעה בזכויות.'}
+  };
+  const meta=QUESTIONS_META[qid];
+  if(!meta)return;
+  const userAns=document.getElementById(qid+'-ans').value.trim();
+  if(!userAns){alert('כתוב קודם תשובה!');return;}
+  const btn=document.getElementById(qid+'-ai-btn');
+  const fb=document.getElementById(qid+'-fb');
+  const key=getApiKey();
+  if(!key){fb.style.display='block';fb.textContent='הכנס מפתח API כדי לקבל משוב.';return;}
+  btn.disabled=true;btn.textContent='בודק...';
+  fb.style.display='block';fb.innerHTML='<span class="loading-dots">בודק...</span>';
+  const prompt=`אתה מורה לאזרחות ישראלית. תלמיד ענה על שאלת ידע. בדוק את תשובתו.\n\nהשאלה: "${meta.q}"\nתשובה נכונה: "${meta.correct}"\nתשובת התלמיד: "${userAns}"\n\nתן משוב קצר בעברית (3-4 שורות): מה נכון, מה חסר, מה לתקן. אל תכתוב את התשובה המלאה.`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:500,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    if(data.error)fb.textContent='שגיאה: '+data.error.message;
+    else{const raw=data.content?.map(i=>i.text||'').join('')||'לא התקבלה תשובה.';fb.innerHTML=raw.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');}
+  }catch(e){fb.textContent='שגיאת חיבור: '+e.message;}
+  btn.disabled=false;btn.textContent='✨ AI בודק';
+}
+function startFlash(key){
+  currentFlashTopic=key;
+  flashCards=[...FLASHCARDS[key]].sort(()=>Math.random()-.5);
+  flashIdx=0;flashKnew=0;flashDidnt=0;
+  renderFlash();
+  document.getElementById('flash-topic-list').style.display='none';
+  document.getElementById('flash-area').style.display='block';
+}
+let flashMode='flip'; // 'flip' or 'write'
+function setFlashMode(mode){
+  flashMode=mode;
+  document.querySelectorAll('.fc-mode-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('fc-mode-'+mode).classList.add('active');
+  renderFlash();
+}
+function renderFlash(){
+  const area=document.getElementById('flash-area');
+  if(flashIdx>=flashCards.length){
+    area.innerHTML=`<button class="back-btn" onclick="backToFlashTopics()">← חזרה</button><div class="card" style="text-align:center;padding:1.75rem;"><h3>סיימת!</h3><div class="score-summary"><div class="score-card green"><div class="num">${flashKnew}</div><div class="lbl">ידעתי</div></div><div class="score-card red"><div class="num">${flashDidnt}</div><div class="lbl">לא ידעתי</div></div></div><button class="restart-btn" onclick="startFlash('${currentFlashTopic}')">🔄 עוד סיבוב</button></div>`;
+    return;
+  }
+  const card=flashCards[flashIdx];
+  const pct=Math.round((flashIdx/flashCards.length)*100);
+  const modeToggle=`<div class="fc-mode-toggle"><button class="fc-mode-btn ${flashMode==='flip'?'active':''}" id="fc-mode-flip" onclick="setFlashMode('flip')">👁️ הסתכל על התשובה</button><button class="fc-mode-btn ${flashMode==='write'?'active':''}" id="fc-mode-write" onclick="setFlashMode('write')">✍️ כתוב תשובה + AI בודק</button></div>`;
+  const progress=`<div class="fc-progress"><div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>כרטיס ${flashIdx+1} מתוך ${flashCards.length}</div>`;
+
+  if(flashMode==='flip'){
+    area.innerHTML=`<button class="back-btn" onclick="backToFlashTopics()">← חזרה</button>${modeToggle}${progress}<div class="flashcard" id="fc" onclick="revealFlash()"><div class="q-label">מה ההגדרה של?</div><div class="q-text">${card.topic}</div><div class="a-text">${card.a}</div><div class="flip-hint">לחץ לגלות</div></div><div class="fc-controls" id="fc-controls" style="display:none;"><button class="knew" onclick="fcAnswer(true)">✓ ידעתי</button><button class="didnt" onclick="fcAnswer(false)">✗ לא ידעתי</button></div>`;
+  } else {
+    const hasKey=!!getApiKey();
+    area.innerHTML=`<button class="back-btn" onclick="backToFlashTopics()">← חזרה</button>${modeToggle}${progress}
+<div class="card">
+  <div style="font-size:11px;color:var(--text2);margin-bottom:6px;">מה ההגדרה של?</div>
+  <div style="font-size:16px;font-weight:500;color:var(--text);margin-bottom:12px;">${card.topic}</div>
+  <textarea class="fc-write-area" id="fc-write" placeholder="כתוב כאן את ההגדרה במילים שלך..."></textarea>
+  <button class="fc-reveal-btn" onclick="revealCompare()">👁️ הצג תשובה נכונה להשוואה</button>
+  <div class="fc-compare" id="fc-compare">
+    <div class="fc-compare-grid">
+      <div class="fc-col mine"><div class="fc-col-label">התשובה שלך</div><div id="fc-my-text" style="white-space:pre-wrap;"></div></div>
+      <div class="fc-col correct"><div class="fc-col-label">✓ התשובה הנכונה</div>${card.a}</div>
+    </div>
+    ${hasKey ? `<button class="fc-ai-btn" id="fc-ai-btn" onclick="checkFlashWithAI()">✨ AI — הראה לי מה חסר בתשובה שלי</button>` : `<div style="font-size:12px;color:var(--text3);padding:6px 0;">להוספת משוב AI — הכנס מפתח API בשורה למעלה</div>`}
+    <div class="fc-ai-feedback" id="fc-ai-fb"></div>
+  </div>
+  <div class="fc-controls" id="fc-controls" style="display:none;margin-top:8px;">
+    <button class="knew" onclick="fcAnswer(true)">✓ הייתי קרוב</button>
+    <button class="didnt" onclick="fcAnswer(false)">✗ חסר הרבה</button>
+  </div>
+</div>`;
+  }
+}
+function revealCompare(){
+  const userText=document.getElementById('fc-write').value.trim();
+  document.getElementById('fc-my-text').textContent=userText||'(לא כתבת כלום)';
+  document.getElementById('fc-compare').style.display='block';
+  document.getElementById('fc-controls').style.display='flex';
+}
+function revealFlash(){document.getElementById('fc').classList.add('revealed');document.getElementById('fc-controls').style.display='flex';}
+function fcAnswer(knew){if(knew)flashKnew++;else flashDidnt++;flashIdx++;renderFlash();}
+async function checkFlashWithAI(){
+  const card=flashCards[flashIdx];
+  const userAnswer=document.getElementById('fc-write').value.trim();
+  const btn=document.getElementById('fc-ai-btn');
+  const fb=document.getElementById('fc-ai-fb');
+  btn.disabled=true;
+  btn.textContent='בודק...';
+  fb.style.display='block';
+  fb.innerHTML='<span class="loading-dots">AI משווה את התשובות...</span>';
+  const prompt=`אתה מורה לאזרחות ישראלית. תלמיד כתב הגדרה למושג. השווה בין תשובתו לבין ההגדרה הנכונה.
+
+מושג: "${card.topic}"
+הגדרה נכונה: "${card.a}"
+תשובת התלמיד: "${userAnswer||'(ריק)'}"
+
+ענה בעברית בלבד, בצורה קצרה וישירה:
+1. מה נכון בתשובה שלו
+2. מה חסר (ציין מילות מפתח ספציפיות שהיו חסרות)
+3. משפט אחד מסכם — כמה קרוב היה
+
+אל תכתוב את ההגדרה המלאה מחדש.`;
+  try{
+    const key=getApiKey();
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:400,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    if(data.error){fb.textContent='שגיאה: '+data.error.message;} 
+    else{fb.textContent=data.content?.map(i=>i.text||'').join('')||'לא התקבלה תשובה.';}
+  }catch(e){fb.textContent='שגיאת חיבור: '+e.message;}
+  btn.disabled=false;
+  btn.textContent='✨ AI — הראה לי מה חסר בתשובה שלי';
+}
+function backToFlashTopics(){document.getElementById('flash-topic-list').style.display='block';document.getElementById('flash-area').style.display='none';}
+
+const _qCache={};
+let _qCacheIdx=0;
+function storeQ(q){const id='q'+(++_qCacheIdx);_qCache[id]=q;return id;}
+
+function showEventQ(idx){renderEventQ(EVENT_QUESTIONS[idx]);}
+function renderEventQ(q){
+  const qid=storeQ(q);
+  const el=document.getElementById('event-content');
+  const hasKey=!!getApiKey();
+  el.innerHTML=`<button class="back-btn" onclick="backToEventList()">← חזרה לשאלות</button>
+  <div class="event-q">
+    <span class="q-badge ${q.badge}">${q.badge==='real'?'📄 מבחן אמיתי':'✨ נוצר חדש'}</span>
+    <div class="passage">${q.passage}</div>
+    <div class="q-label-ev">${q.question}</div>
+    <div style="margin-top:12px;">
+      <div class="answer-step active"><label><span class="step-pill pill-c">ציין</span> שם המושג בלבד:</label><input type="text" id="ans-ciyen" placeholder="שם המושג..."></div>
+      <div class="answer-step"><label><span class="step-pill pill-h">הצג</span> ההגדרה המלאה:</label><textarea id="ans-hatseg" rows="3" placeholder="ההגדרה המלאה מהחומר..."></textarea></div>
+      <div class="answer-step"><label><span class="step-pill pill-t">ציטוט</span> העתק משפט מהקטע:</label><textarea id="ans-tzitut" rows="2" placeholder="ציטוט מהקטע..."></textarea></div>
+      <div class="answer-step"><label><span class="step-pill pill-e">הסבר</span> קשר בין הציטוט להגדרה (לא לחזור על הציטוט):</label><textarea id="ans-hesber" rows="4" placeholder="ההסבר במילים שלך..."></textarea></div>
+    </div>
+    <button class="check-btn" id="check-btn" onclick="checkWithAI('${qid}')">${hasKey?'בדוק תשובה עם AI ↗':'בדוק תשובה (AI לא מוגדר)'}</button>
+    <div class="feedback-box" id="feedback"></div>
+    <div class="hint-area">
+      <button class="hint-toggle" onclick="toggleHints()" id="hint-btn" style="width:100%;text-align:center;padding:6px;">💡 הצג רמזים ותשובה לדוגמה ▼</button>
+      <div id="full-hints">
+        <div style="margin-top:10px;padding-top:8px;border-top:0.5px solid var(--border);">
+          <strong>ציין:</strong> ${q.hints.ciyen}<br>
+          <strong>הצג:</strong> ${q.hints.hatseg}<br>
+          <strong>ציטוט:</strong> ${q.hints.tzitut}<br>
+          <strong>הסבר:</strong> ${q.hints.hesber}
+        </div>
+      </div>
+    </div>
+  </div>`;
+  document.getElementById('event-list').style.display='none';
+  el.style.display='block';
+}
+function toggleHints(){
+  const h=document.getElementById('full-hints');
+  const btn=document.getElementById('hint-btn');
+  const open=h.style.display!=='block';
+  h.style.display=open?'block':'none';
+  btn.textContent=open?'💡 הסתר רמזים ▲':'💡 הצג רמזים ותשובה לדוגמה ▼';
+}
+function backToEventList(){document.getElementById('event-list').style.display='block';document.getElementById('event-content').style.display='none';}
+async function checkWithAI(qid){
+  const q=_qCache[qid];
+  if(!q){alert('שגיאה פנימית — נסה לרענן');return;}
+  const ciyen=document.getElementById('ans-ciyen').value.trim();
+  const hatseg=document.getElementById('ans-hatseg').value.trim();
+  const tzitut=document.getElementById('ans-tzitut').value.trim();
+  const hesber=document.getElementById('ans-hesber').value.trim();
+  if(!ciyen&&!hatseg&&!tzitut&&!hesber){alert('כתוב קודם את התשובה!');return;}
+  const fb=document.getElementById('feedback');
+  const btn=document.getElementById('check-btn');
+  const key=getApiKey();
+  if(!key){fb.className='feedback-box visible ai-feedback';fb.innerHTML='הכנס מפתח API בשורה למעלה כדי לקבל משוב.';return;}
+  fb.className='feedback-box visible ai-feedback';
+  fb.innerHTML='<span class="loading-dots">בודק את התשובה שלך...</span>';
+  btn.disabled=true;
+  const prompt=`אתה מורה לאזרחות ישראלית. תלמיד ענה על שאלת ארוע. תן משוב מפורט בעברית לפי המבנה הבא בדיוק:
+
+**ציין:** [כתוב אם נכון/לא נכון ולמה]
+
+**הצג — תשובת התלמיד:** ${hatseg||'(ריק)'}
+**הצג — ההגדרה הנכונה המלאה:** ${q.hints.hatseg}
+**מה חסר בהצג:** [פרט אילו מילות מפתח או רעיונות חסרו]
+
+**ציטוט:** [כתוב אם הציטוט מתאים לשאלה. אם לא — הצע ציטוט טוב יותר מהקטע]
+
+**הסבר — תשובת התלמיד:** ${hesber||'(ריק)'}
+**מה חסר בהסבר:** [הסבר מה לא מספיק טוב — האם קישר בין הציטוט להגדרה? האם הזכיר את שם המנגנון/עקרון בפירוש?]
+**דוגמה להסבר טוב:** ${q.hints.hesber}
+
+---
+הקטע: "${q.passage}"
+השאלה: "${q.question}"
+תשובת התלמיד — ציין: ${ciyen||'(ריק)'} | ציטוט: ${tzitut||'(ריק)'}
+
+ענה בעברית בלבד. היה ספציפי ומועיל. אל תחזור על הציטוט המלא מהקטע.`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    if(data.error)fb.innerHTML='שגיאה: '+data.error.message;
+    else{
+      const raw=data.content?.map(i=>i.text||'').join('')||'לא התקבלה תשובה.';
+      fb.innerHTML=raw
+        .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+        .replace(/\n/g,'<br>');
+    }
+  }catch(e){fb.innerHTML='שגיאת חיבור: '+e.message;}
+  btn.disabled=false;
+}
+async function generateNewQuestion(){
+  const btn=document.querySelector('.gen-btn');
+  const container=document.getElementById('generated-questions');
+  const key=getApiKey();
+  if(!key){alert('הכנס מפתח API בשורה למעלה כדי לייצר שאלות חדשות.');return;}
+  btn.textContent='✨ מייצר שאלה חדשה...';
+  btn.disabled=true;
+  const topics=['עקרון הגבלת השלטון','עקרון שלטון העם','מנגנון פיקוח מוסדי','מנגנון פיקוח בלתי מוסדי','תנאי כלליות','תנאי מחזוריות','תנאי חשאיות','חוק השבות','חוק שעות עבודה','הגישה הליברלית','הגישה הסוציאל-דמוקרטית'];
+  const chosen=topics[Math.floor(Math.random()*topics.length)];
+  const prompt=`אתה מורה לאזרחות ישראלית. צור שאלת ארוע חדשה ומקורית לתרגול על המושג: "${chosen}".\n\nהפורמט חייב להיות JSON בלבד (ללא backticks), עם השדות הבאים:\n{"title":"כותרת קצרה","passage":"קטע עיתוני בעברית (4-6 משפטים, ריאליסטי)","question":"השאלה הרשמית: ציינו והציגו את... צטטו... הסבירו...","hints":{"ciyen":"שם המושג המדויק","hatseg":"ההגדרה המלאה","tzitut":"ציטוט מומלץ מהקטע","hesber":"הסבר לדוגמה"}}`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    if(data.error){alert('שגיאה: '+data.error.message);btn.disabled=false;btn.textContent='✨ צור שאלת ארוע חדשה עם AI';return;}
+    let text=data.content?.map(i=>i.text||'').join('').trim().replace(/```json|```/g,'').trim();
+    const q=JSON.parse(text);
+    q.badge='ai';
+    const qid=storeQ(q);
+    const div=document.createElement('div');
+    div.innerHTML=`<button class="event-list-item" onclick="renderEventQ(_qCache['${qid}'])"><div><div class="ev-title">${q.title}</div><div class="ev-sub">✨ שאלה שנוצרה</div></div><span class="q-badge ai">✨ נוצר חדש</span></button>`;
+    container.prepend(div);
+  }catch(e){alert('שגיאה: '+e.message);}
+  btn.textContent='✨ צור שאלת ארוע חדשה עם AI';
+  btn.disabled=false;
+}
+</script>
+</body>
+</html>
